@@ -139,7 +139,7 @@ Além disso, vocês precisarão usar as classes [TabelaHashExtensível](https://
   - [ ] Há um CRUD de usuários (que estende a classe ArquivoIndexado, acrescentando Tabelas Hash Extensíveis e Árvores B+ como índices diretos e indiretos conforme necessidade) que funciona corretamente?
   - [ ] Há um CRUD de cursos (que estende a classe ArquivoIndexado, acrescentando Tabelas Hash Extensíveis e Árvores B+ como índices diretos e indiretos conforme necessidade) que funciona corretamente?
   - [ ] Os cursos estão vinculados aos usuários usando o idUsuario como chave estrangeira?
-  -   Há uma árvore B+ que registre o relacionamento 1:N entre usuários e cursos?
+  - [ ] Há uma árvore B+ que registre o relacionamento 1:N entre usuários e cursos?
   - [ ] Há um CRUD de usuários (que estende a classe ArquivoIndexado, acrescentando Tabelas Hash Extensíveis e Árvores B+ como índices diretos e indiretos conforme necessidade)?
   - [ ] O trabalho compila corretamente?
   - [ ] O trabalho está completo e funcionando sem erros de execução?
