@@ -29,7 +29,8 @@ Nossa entidade usuário precisará contar com pelo menos os seguintes atributos:
 - HashSenha
 - PerguntaSecreta
 - HashRespostaSecreta
-- Nós não armazenamos a senha de um usuário, mas o código hash retornado por ela. Como temos uma limitação de recursos a serem usados em uma interface textual, os atributos PerguntaSecreta e RespostaSecreta deverão ser usados para recuperação da senha. Lembrem-se de que toda entidade precisa de um identificador exclusivo (ID) que, como vimos nas aulas, será um número inteiro positivo sequencial. Notem que um usuário se identificará por meio do seu email e não do seu ID. A diferença é que o email pode ser alterado, o ID não.
+
+Nós não armazenamos a senha de um usuário, mas o código hash retornado por ela. Como temos uma limitação de recursos a serem usados em uma interface textual, os atributos PerguntaSecreta e RespostaSecreta deverão ser usados para recuperação da senha. Lembrem-se de que toda entidade precisa de um identificador exclusivo (ID) que, como vimos nas aulas, será um número inteiro positivo sequencial. Notem que um usuário se identificará por meio do seu email e não do seu ID. A diferença é que o email pode ser alterado, o ID não.
 
 ### A ENTIDADE CURSO
 Também precisaremos cadastrar os cursos. 
