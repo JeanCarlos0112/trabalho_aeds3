@@ -47,7 +47,7 @@ Cada curso deve ter, pelo menos, os seguintes atributos (além do ID):
 - Código compartilhável
 - Estado
   
-Aqui, o atributo código compartilhável é algo que merece uma atenção especial. Usaremos um código alfanumérico de **10 caracteres** seguindo o padrão da biblioteca (NanoID)[https://github.com/ai/nanoid#readme] e que será gerado automaticamente pelo sistema. Quando alguém quiser mostrar um curso a seus amigos (ou divulgar na Internet), deverá usar esse código. Observem que ele não se confunde com o ID do curso. Finalmente, vocês também precisarão de uma chave estrangeira nessa entidade (o ID do usuário).
+Aqui, o atributo código compartilhável é algo que merece uma atenção especial. Usaremos um código alfanumérico de **10 caracteres** seguindo o padrão da biblioteca [NanoID](https://github.com/ai/nanoid#readme) e que será gerado automaticamente pelo sistema. Quando alguém quiser mostrar um curso a seus amigos (ou divulgar na Internet), deverá usar esse código. Observem que ele não se confunde com o ID do curso. Finalmente, vocês também precisarão de uma chave estrangeira nessa entidade (o ID do usuário).
 
 O atributo de estado do curso indicará qual o estado atual do curso, podendo ser:
 
@@ -119,18 +119,18 @@ PresenteFácil 1.0
 
 Opção: _
 ```
-Lembrem-se de que não colocamos código de interface com o usuário (visão) na mesma classe que o acesso aos dados (modelo). Tentaremos seguir o padrão (MVC)[https://pt.wikipedia.org/wiki/MVC]. Assim, vocês deveriam criar uma classe `VisaoCurso` que conteria todas as operações de entrada e de saída de dados relacionadas a cursos (não inclui o menu acima). Por exemplo, vocês poderiam ter pelo menos uma função `leCurso()` e outra `mostraCurso()`. Finalmente, teriam uma outra classe responsável pela lógica da operação que poderia se chamar `ControleCurso`. Essa última classe seria responsável pelo menu e pela lógica das operações de inclusão, alteração e exclusão, entre outras. Ela acessaria os arquivos necessários, bem como chamaria as funções da visão.
+Lembrem-se de que não colocamos código de interface com o usuário (visão) na mesma classe que o acesso aos dados (modelo). Tentaremos seguir o padrão [MVC](https://pt.wikipedia.org/wiki/MVC). Assim, vocês deveriam criar uma classe `VisaoCurso` que conteria todas as operações de entrada e de saída de dados relacionadas a cursos (não inclui o menu acima). Por exemplo, vocês poderiam ter pelo menos uma função `leCurso()` e outra `mostraCurso()`. Finalmente, teriam uma outra classe responsável pela lógica da operação que poderia se chamar `ControleCurso`. Essa última classe seria responsável pelo menu e pela lógica das operações de inclusão, alteração e exclusão, entre outras. Ela acessaria os arquivos necessários, bem como chamaria as funções da visão.
 
 Neste TP1, também não faremos a opção C, das inscrições. Isso ficará para o TP2.
 
 ### CÓDIGO QUE JÁ ESTÁ PRONTO
-Nesse projeto, vocês devem necessariamente usar o (CRUD genéricoLinks)[https://github.com/kutova/AEDsIII/tree/main/CRUD2] que desenvolvemos em sala como base. Nosso CRUD cria registros com a seguinte estrutura:
+Nesse projeto, vocês devem necessariamente usar o [CRUD genéricoLinks](https://github.com/kutova/AEDsIII/tree/main/CRUD2) que desenvolvemos em sala como base. Nosso CRUD cria registros com a seguinte estrutura:
 
 - Lápide - Byte que indica se o registro é válido ou se é um registro excluído;
 - Indicador de tamanho do registro - Número inteiro (short) que indica o tamanho do vetor de bytes;
 - Vetor de bytes - Bytes que descrevem a entidade (obtido por meio do método toByteArray() do próprio objeto da entidade).
   
-Além disso, vocês precisarão usar as classes (TabelaHashExtensível)[https://github.com/kutova/AEDsIII/tree/main/TabelaHashExtensivel] e (Árvore B+)[https://github.com/kutova/AEDsIII/tree/main/ArvoreBMais] que disponibizei para criar os índices. Não vale inventar uma nova estrutura de dados para os índices nesse projeto, ok?
+Além disso, vocês precisarão usar as classes [TabelaHashExtensível](https://github.com/kutova/AEDsIII/tree/main/TabelaHashExtensivel) e [Árvore B+](https://github.com/kutova/AEDsIII/tree/main/ArvoreBMais) que disponibizei para criar os índices. Não vale inventar uma nova estrutura de dados para os índices nesse projeto, ok?
 
 ### COMO ENTREGAR
 
