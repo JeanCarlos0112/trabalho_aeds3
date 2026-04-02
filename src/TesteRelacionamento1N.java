@@ -25,8 +25,8 @@ public class TesteRelacionamento1N {
 
     public static void main(String[] args) {
         System.out.println("╔══════════════════════════════════════════════════════════╗");
-        System.out.println("║  TESTE — Relacionamento 1:N com Árvore B+ (ParIdId)      ║");
-        System.out.println("║  Responsável: JEAN                                       ║");
+        System.out.println("║  TESTE - Relacionamento 1:N com Arvore B+ (ParIdId)      ║");
+        System.out.println("║  Responsavel: JEAN                                       ║");
         System.out.println("╚══════════════════════════════════════════════════════════╝\n");
 
         try {
@@ -38,7 +38,7 @@ public class TesteRelacionamento1N {
             // ============================================================
             //  SETUP: Criar usuários de teste
             // ============================================================
-            printSecao("SETUP — Criando usuários de teste");
+            printSecao("SETUP - Criando usuários de teste");
 
             Usuario u1 = new Usuario("Alice", "alice@puc.br", "senha1".hashCode(), "Cor?", "azul".hashCode());
             Usuario u2 = new Usuario("Bob", "bob@puc.br", "senha2".hashCode(), "Pet?", "gato".hashCode());
@@ -48,14 +48,14 @@ public class TesteRelacionamento1N {
             int idBob   = arqUsuario.create(u2);
             int idCarol = arqUsuario.create(u3);
 
-            System.out.println("  Usuário Alice criado — ID: " + idAlice);
-            System.out.println("  Usuário Bob   criado — ID: " + idBob);
-            System.out.println("  Usuário Carol criado — ID: " + idCarol);
+            System.out.println("  Usuario Alice criado - ID: " + idAlice);
+            System.out.println("  Usuario Bob   criado - ID: " + idBob);
+            System.out.println("  Usuario Carol criado - ID: " + idCarol);
 
             // ============================================================
             //  TESTE 1: Criar cursos vinculados a usuários
             // ============================================================
-            printSecao("TESTE 1 — Criar cursos vinculados (create mantém índice B+)");
+            printSecao("TESTE 1 - Criar cursos vinculados (create mantem indice B+)");
 
             // Alice: 3 cursos
             Curso c1 = new Curso(idAlice, "Python basico",      "Curso de Python",     LocalDate.of(2026,5,20), "abc1234567", 0);
@@ -63,11 +63,11 @@ public class TesteRelacionamento1N {
             Curso c3 = new Curso(idAlice, "Banco de Dados",     "Curso de BD",         LocalDate.of(2026,7,1),  "ghi1234567", 0);
 
             // Bob: 2 cursos
-            Curso c4 = new Curso(idBob,   "Financas pessoais",  "Curso de finanças",   LocalDate.of(2026,2,10), "jkl1234567", 0);
+            Curso c4 = new Curso(idBob,   "Financas pessoais",  "Curso de financas",   LocalDate.of(2026,2,10), "jkl1234567", 0);
             Curso c5 = new Curso(idBob,   "Arduino basico",     "Curso de Arduino",    LocalDate.of(2026,4,15), "mno1234567", 0);
 
             // Carol: 1 curso
-            Curso c6 = new Curso(idCarol, "Violao para todos",  "Curso de violão",     LocalDate.of(2026,8,5),  "pqr1234567", 0);
+            Curso c6 = new Curso(idCarol, "Violao para todos",  "Curso de violao",     LocalDate.of(2026,8,5),  "pqr1234567", 0);
 
             int idC1 = arqCurso.create(c1);
             int idC2 = arqCurso.create(c2);
@@ -77,14 +77,14 @@ public class TesteRelacionamento1N {
             int idC6 = arqCurso.create(c6);
 
             System.out.println("  Cursos criados:");
-            System.out.println("    Alice → Python basico (ID:" + idC1 + "), Java avancado (ID:" + idC2 + "), Banco de Dados (ID:" + idC3 + ")");
-            System.out.println("    Bob   → Financas pessoais (ID:" + idC4 + "), Arduino basico (ID:" + idC5 + ")");
-            System.out.println("    Carol → Violao para todos (ID:" + idC6 + ")");
+            System.out.println("    Alice -> Python basico (ID:" + idC1 + "), Java avancado (ID:" + idC2 + "), Banco de Dados (ID:" + idC3 + ")");
+            System.out.println("    Bob   -> Financas pessoais (ID:" + idC4 + "), Arduino basico (ID:" + idC5 + ")");
+            System.out.println("    Carol -> Violao para todos (ID:" + idC6 + ")");
 
             // ============================================================
             //  TESTE 2: readAll — buscar todos os cursos de cada usuário
             // ============================================================
-            printSecao("TESTE 2 — readAll(idUsuario) retorna cursos corretos");
+            printSecao("TESTE 2 - readAll(idUsuario) retorna cursos corretos");
 
             ArrayList<Curso> cursosAlice = arqCurso.readAll(idAlice);
             ArrayList<Curso> cursosBob   = arqCurso.readAll(idBob);
@@ -104,7 +104,7 @@ public class TesteRelacionamento1N {
             // ============================================================
             //  TESTE 3: readAllOrdenadoPorNome — ordem alfabética
             // ============================================================
-            printSecao("TESTE 3 — readAllOrdenadoPorNome retorna em ordem alfabética");
+            printSecao("TESTE 3 - readAllOrdenadoPorNome retorna em ordem alfabética");
 
             ArrayList<Curso> aliceOrdenado = arqCurso.readAllOrdenadoPorNome(idAlice);
             System.out.println("  Cursos da Alice (ordem alfabética):");
@@ -113,23 +113,23 @@ public class TesteRelacionamento1N {
             }
 
             // Ordem esperada: Banco de Dados, Java avancado, Python basico
-            verificar("1º curso é 'Banco de Dados'",  aliceOrdenado.get(0).getNome().equals("Banco de Dados"));
-            verificar("2º curso é 'Java avancado'",   aliceOrdenado.get(1).getNome().equals("Java avancado"));
-            verificar("3º curso é 'Python basico'",   aliceOrdenado.get(2).getNome().equals("Python basico"));
+            verificar("Primeiro curso é 'Banco de Dados'",  aliceOrdenado.get(0).getNome().equals("Banco de Dados"));
+            verificar("Segundo curso é 'Java avancado'",   aliceOrdenado.get(1).getNome().equals("Java avancado"));
+            verificar("Terceiro curso é 'Python basico'",   aliceOrdenado.get(2).getNome().equals("Python basico"));
 
             // ============================================================
             //  TESTE 4: verificaUsuarioTemCursos
             // ============================================================
-            printSecao("TESTE 4 — verificaUsuarioTemCursos");
+            printSecao("TESTE 4 - verificaUsuarioTemCursos");
 
             verificar("Alice TEM cursos",        arqCurso.verificaUsuarioTemCursos(idAlice) == true);
             verificar("Bob TEM cursos",          arqCurso.verificaUsuarioTemCursos(idBob) == true);
-            verificar("Usuário 999 NÃO tem",     arqCurso.verificaUsuarioTemCursos(999) == false);
+            verificar("Usuário 999 NAO tem",     arqCurso.verificaUsuarioTemCursos(999) == false);
 
             // ============================================================
             //  TESTE 5: delete — remover curso e verificar índice
             // ============================================================
-            printSecao("TESTE 5 — delete remove curso do índice B+");
+            printSecao("TESTE 5 - delete remove curso do índice B+");
 
             System.out.println("  Removendo 'Java avancado' (ID:" + idC2 + ") da Alice...");
             boolean removido = arqCurso.delete(idC2);
@@ -137,31 +137,31 @@ public class TesteRelacionamento1N {
 
             ArrayList<Curso> aliceAposDelete = arqCurso.readAll(idAlice);
             System.out.println("  Cursos da Alice agora: " + listaNomes(aliceAposDelete));
-            verificar("Alice tem 2 cursos após exclusão", aliceAposDelete.size() == 2);
+            verificar("Alice tem 2 cursos apos exclusao", aliceAposDelete.size() == 2);
 
             boolean achouJava = false;
             for (Curso c : aliceAposDelete)
                 if (c.getNome().equals("Java avancado")) achouJava = true;
-            verificar("'Java avancado' não aparece mais", achouJava == false);
+            verificar("'Java avancado' nao aparece mais", achouJava == false);
 
             // Verifica que os cursos do Bob não foram afetados
             ArrayList<Curso> bobAposDelete = arqCurso.readAll(idBob);
-            verificar("Bob continua com 2 cursos (não afetado)", bobAposDelete.size() == 2);
+            verificar("Bob continua com 2 cursos (nao afetado)", bobAposDelete.size() == 2);
 
             // ============================================================
             //  TESTE 6: update — alterar nome e verificar índice de nomes
             // ============================================================
-            printSecao("TESTE 6 — update atualiza índice de nomes");
+            printSecao("TESTE 6 - update atualiza indice de nomes");
 
             Curso pythonAtual = arqCurso.read(idC1);
-            System.out.println("  Renomeando '" + pythonAtual.getNome() + "' → 'Aprenda Python'...");
+            System.out.println("  Renomeando '" + pythonAtual.getNome() + "' -> 'Aprenda Python'...");
             Curso pythonNovo = new Curso(idC1, idAlice, "Aprenda Python", "Curso de Python",
                 LocalDate.of(2026, 5, 20), "abc1234567", 0);
             boolean atualizado = arqCurso.update(pythonNovo);
             verificar("update retornou true", atualizado);
 
             ArrayList<Curso> aliceOrdenadoApos = arqCurso.readAllOrdenadoPorNome(idAlice);
-            System.out.println("  Cursos da Alice (ordem alfabética após update):");
+            System.out.println("  Cursos da Alice (ordem alfabetica apos update):");
             for (int i = 0; i < aliceOrdenadoApos.size(); i++) {
                 System.out.println("    " + (i + 1) + ". " + aliceOrdenadoApos.get(i).getNome());
             }
@@ -172,7 +172,7 @@ public class TesteRelacionamento1N {
             // ============================================================
             //  TESTE 7: deletar TODOS os cursos de um usuário
             // ============================================================
-            printSecao("TESTE 7 — Deletar todos os cursos de um usuário");
+            printSecao("TESTE 7 - Deletar todos os cursos de um usuario");
 
             System.out.println("  Removendo todos os cursos do Bob...");
             arqCurso.delete(idC4);
@@ -190,7 +190,7 @@ public class TesteRelacionamento1N {
             // ============================================================
             //  TESTE 8: ParEmailId — busca de usuário por email
             // ============================================================
-            printSecao("TESTE 8 — ParEmailId (índice de email funcional)");
+            printSecao("TESTE 8 - ParEmailId (indice de email funcional)");
 
             Usuario encontrado = arqUsuario.readEmail("alice@puc.br");
             verificar("readEmail('alice@puc.br') encontrou Alice",
@@ -208,19 +208,19 @@ public class TesteRelacionamento1N {
 
             System.out.println("\n╔══════════════════════════════════════════════════════════╗");
             System.out.printf( "║  RESULTADO: %d/%d testes passaram", passou, totalTestes);
-            int espacos = 43 - String.valueOf(passou).length() - String.valueOf(totalTestes).length();
+            int espacos = 28 - String.valueOf(passou).length() - String.valueOf(totalTestes).length();
             System.out.println(" ".repeat(espacos) + "║");
             if (falhou == 0) {
-                System.out.println("║  ✅ TUDO CERTO — Implementacao 1:N funcionando!        ║");
+                System.out.println("║  (V) TUDO CERTO - Implementacao 1:N funcionando!         ║");
             } else {
-                System.out.printf("║  ❌ %d teste(s) falharam - verifique os erros acima", falhou);
+                System.out.printf("║  (X) %d teste(s) falharam - verifique os erros acima", falhou);
                 int esp2 = 38 - String.valueOf(falhou).length();
                 System.out.println(" ".repeat(Math.max(esp2, 1)) + "║");
             }
             System.out.println("╚══════════════════════════════════════════════════════════╝");
 
         } catch (Exception e) {
-            System.out.println("\n❌ ERRO FATAL: " + e.getMessage());
+            System.out.println("\n(X) ERRO FATAL: " + e.getMessage());
             e.printStackTrace();
             limparDados();
         }
@@ -234,10 +234,10 @@ public class TesteRelacionamento1N {
         totalTestes++;
         if (condicao) {
             passou++;
-            System.out.println("    ✅ " + descricao);
+            System.out.println("    (V) " + descricao);
         } else {
             falhou++;
-            System.out.println("    ❌ FALHOU: " + descricao);
+            System.out.println("    (X) FALHOU: " + descricao);
         }
     }
 
