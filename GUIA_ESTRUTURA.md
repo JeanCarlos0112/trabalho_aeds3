@@ -101,7 +101,7 @@ Então quando o André chamar `readAll(3)`, internamente acontece:
 
 1. Cria `ParIdId(3, -1)` como chave de busca
 2. A Árvore B+ percorre as folhas comparando
-3. Como `id2 == -1`, o `compareTo` retorna 0 para QUALQUER par que tenha `id1 == 3`
+3. Como `id2 == -1`, o `compareTo` retorna 0 para **QUALQUER** par que tenha `id1 == 3`
 4. Retorna todos: `(3,1)`, `(3,5)`, `(3,12)` — ou seja, cursos 1, 5 e 12 do usuário 3
 
 ---
