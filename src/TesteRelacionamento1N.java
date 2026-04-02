@@ -98,7 +98,7 @@ public class TesteRelacionamento1N {
             verificar("Bob tem 2 cursos",   cursosBob.size() == 2);
             verificar("Carol tem 1 curso",  cursosCarol.size() == 1);
 
-            verificar("Curso da Carol é 'Violao para todos'",
+            verificar("Curso da Carol eh 'Violao para todos'",
                 cursosCarol.get(0).getNome().equals("Violao para todos"));
 
             // ============================================================
@@ -113,9 +113,9 @@ public class TesteRelacionamento1N {
             }
 
             // Ordem esperada: Banco de Dados, Java avancado, Python basico
-            verificar("Primeiro curso é 'Banco de Dados'",  aliceOrdenado.get(0).getNome().equals("Banco de Dados"));
-            verificar("Segundo curso é 'Java avancado'",   aliceOrdenado.get(1).getNome().equals("Java avancado"));
-            verificar("Terceiro curso é 'Python basico'",   aliceOrdenado.get(2).getNome().equals("Python basico"));
+            verificar("Primeiro curso eh 'Banco de Dados'",  aliceOrdenado.get(0).getNome().equals("Banco de Dados"));
+            verificar("Segundo curso eh 'Java avancado'",   aliceOrdenado.get(1).getNome().equals("Java avancado"));
+            verificar("Terceiro curso eh 'Python basico'",   aliceOrdenado.get(2).getNome().equals("Python basico"));
 
             // ============================================================
             //  TESTE 4: verificaUsuarioTemCursos
@@ -124,12 +124,12 @@ public class TesteRelacionamento1N {
 
             verificar("Alice TEM cursos",        arqCurso.verificaUsuarioTemCursos(idAlice) == true);
             verificar("Bob TEM cursos",          arqCurso.verificaUsuarioTemCursos(idBob) == true);
-            verificar("Usuário 999 NAO tem",     arqCurso.verificaUsuarioTemCursos(999) == false);
+            verificar("Usuario 999 NAO tem",     arqCurso.verificaUsuarioTemCursos(999) == false);
 
             // ============================================================
             //  TESTE 5: delete — remover curso e verificar índice
             // ============================================================
-            printSecao("TESTE 5 - delete remove curso do índice B+");
+            printSecao("TESTE 5 - delete remove curso do indice B+");
 
             System.out.println("  Removendo 'Java avancado' (ID:" + idC2 + ") da Alice...");
             boolean removido = arqCurso.delete(idC2);
@@ -166,8 +166,8 @@ public class TesteRelacionamento1N {
                 System.out.println("    " + (i + 1) + ". " + aliceOrdenadoApos.get(i).getNome());
             }
             // Ordem esperada: Aprenda Python, Banco de Dados
-            verificar("1º agora é 'Aprenda Python'", aliceOrdenadoApos.get(0).getNome().equals("Aprenda Python"));
-            verificar("2º agora é 'Banco de Dados'", aliceOrdenadoApos.get(1).getNome().equals("Banco de Dados"));
+            verificar("Primeiro agora eh 'Aprenda Python'", aliceOrdenadoApos.get(0).getNome().equals("Aprenda Python"));
+            verificar("Segundo agora eh 'Banco de Dados'", aliceOrdenadoApos.get(1).getNome().equals("Banco de Dados"));
 
             // ============================================================
             //  TESTE 7: deletar TODOS os cursos de um usuário
