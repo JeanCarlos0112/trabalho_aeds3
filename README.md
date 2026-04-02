@@ -6,8 +6,12 @@ A proposta é basicamente as informações previas que o professor passou pra ge
 [Proposta de trabalho do professor](https://github.com/JeanCarlos0112/trabalho_aeds3/blob/main/PROPOSTA.md)
 
 ## CHANGELOG (O QUE FOI FEITO):
-As mudanças e a checklist estará no arquivo ao final dessa seção, vou colocar um resumo do changelog só pra poder ficar de mais facil administração:
+As mudanças detalhadas e a checklist estará no arquivo ao final dessa seção, vou colocar um resumo do changelog só pra poder ficar de mais facil administração:
 
+**02/04 — JEAN**: Criou ParEmailId, ArquivoCurso com B+, teste, guia e ajustou ArquivoUsuario.
+**01/04 — MIRO**: Criou as entidades, criou CRUD base (Usuario e Curso) e organizou pacote aed3 (Codigos que o professor forneceu para usar como base no desenvolvimento).
+
+[Arquivo de changelog detalhado](https://github.com/JeanCarlos0112/trabalho_aeds3/blob/main/CHANGELOG.md)
 
 ## GUIA PARA A ESTRUTURA DE DIRETORIOS ATUAL, DO QUE FOI FEITO E DO QUE FAZER
 O arquivo contempla uma especie de guia para a estrutura de pastas que **MIRO** criou e eu (**JEAN**) organizei para ficar mais facil de visualizar o projeto e fazer implementação e/ou ajustes adicionais, além disso no guia também tem cada alteração de forma detalhada de como eu (**JEAN**) fiz cada coisa e algumas dicas para as outras partes, é bom dar uma olhada pode ser um bom começo para vocês, o guia estará no arquivo abaixo:
