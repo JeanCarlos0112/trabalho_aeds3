@@ -9,6 +9,7 @@ A proposta é basicamente as informações previas que o professor passou pra ge
 As mudanças detalhadas e a checklist estará no arquivo ao final dessa seção, vou colocar um resumo do changelog só pra poder ficar de mais facil administração:
 
 **02/04 — JEAN**: Criou ParEmailId, ArquivoCurso com B+, teste, guia e ajustou ArquivoUsuario.
+
 **01/04 — MIRO**: Criou as entidades, criou CRUD base (Usuario e Curso) e organizou pacote aed3 (Codigos que o professor forneceu para usar como base no desenvolvimento).
 
 [Arquivo de changelog detalhado](https://github.com/JeanCarlos0112/trabalho_aeds3/blob/main/CHANGELOG.md)
