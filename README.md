@@ -30,7 +30,7 @@ A proposta é basicamente as informações previas que o professor passou pra ge
 - entidades/cursos/ParIdId.java — Arquivo vazio criado pelo MIRO como placeholder. Deletado porque o ParIdId completo já existe no pacote aed3/ (código do professor) e é esse que o ArquivoCurso utiliza. Manter os dois causa conflito de pacote.
 
 
-### [2026-04-02] — MIRO — Entidades e CRUD base
+### [2026-04-01] — MIRO — Entidades e CRUD base
 #### Arquivos criados:
 
 - aed3/* — Pacote do professor Kutova copiado integralmente (Arquivo.java, ArvoreBMais.java, HashExtensivel.java, interfaces, ParIDEndereco, ParIdId, ParNomeId).
