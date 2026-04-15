@@ -28,10 +28,25 @@ public class Curso implements InterfaceEntidade {
     }
 
     @Override public int getID() { return idCurso; }
-    @Override public void setID(int id) { this.idCurso = id; }
     public int getIdUsuario() { return idUsuario; }
     public String getNome() { return nome; }
+    public String getDescricao() { return descricao; }
+    public LocalDate getDataInicio() { return dataInicio; }
+    public String getCodigo() { return codigo; }
+    public int getEstado() { return estado; }
+    
+    @Override public void setID(int id) { this.idCurso = id; }
     public void setCodigo(String c) { this.codigo = c; }
+    public void setEstado(int e) { this.estado = e; }
+    
+    public String getEstadoTexto() {
+        switch(this.estado) {
+            case 1: return "Ativo";
+            case 2: return "Concluído";
+            case 3: return "Suspenso";
+            default: return "Pendente";
+        }
+    }
 
     @Override
     public byte[] toByteArray() throws Exception {
