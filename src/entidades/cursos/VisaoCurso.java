@@ -13,35 +13,39 @@ public class VisaoCurso {
     }
 
     public void menuCurso(int idUsuarioLogado) {
-        System.out.println("╔════════════════════╗");
-        System.out.println("║    Menu Cursos     ║");
-        System.out.println("╚════════════════════╝\n");
-        System.out.println("Opcoes:");
-        System.out.println("1 - Listar Meus Cursos");
-        System.out.println("2 - Cadastrar Novo Curso");
-        System.out.println("3 - Atualizar Curso");
-        System.out.println("4 - Excluir Curso");
-        
-        // Uso de parseInt para evitar problemas com a quebra de linha do Scanner
-        int opcao = Integer.parseInt(console.nextLine());
+        int opcao = -1;
+        do {
+            System.out.println("\n╔════════════════════╗");
+            System.out.println("║    Menu Cursos     ║");
+            System.out.println("╚════════════════════╝\n");
+            System.out.println("Opcoes:");
+            System.out.println("1 - Listar Meus Cursos");
+            System.out.println("2 - Cadastrar Novo Curso");
+            System.out.println("3 - Atualizar Curso");
+            System.out.println("4 - Excluir Curso");
+            System.out.println("0 - Voltar ao Menu Anterior");
+            
+            // Uso de parseInt para evitar problemas com a quebra de linha do Scanner
+            opcao = Integer.parseInt(console.nextLine());
 
-        switch (opcao) {
-            case 1:
-                telaListagem(idUsuarioLogado);
-                break;
-            case 2:
-                telaCadastro(idUsuarioLogado);
-                break;
-            case 3:
-                telaAtualizacao(idUsuarioLogado);
-                break;
-            case 4:
-                telaExclusao(idUsuarioLogado);
-                break;
-            default:
-                System.out.println("Opção inválida.");
-                break;
-        }
+            switch (opcao) {
+                case 1:
+                    telaListagem(idUsuarioLogado);
+                    break;
+                case 2:
+                    telaCadastro(idUsuarioLogado);
+                    break;
+                case 3:
+                    telaAtualizacao(idUsuarioLogado);
+                    break;
+                case 4:
+                    telaExclusao(idUsuarioLogado);
+                    break;
+                default:
+                    System.out.println("Opção inválida.");
+                    break;
+            }
+        } while (opcao != 0);
     }
 
     public void telaListagem(int idUsuarioLogado) {

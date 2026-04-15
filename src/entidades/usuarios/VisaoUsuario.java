@@ -2,6 +2,8 @@ package entidades.usuarios;
 
 import java.util.Scanner;
 
+import entidades.cursos.VisaoCurso;
+
 public class VisaoUsuario {
     private ControleUsuario controle;
     private Scanner console;
@@ -21,13 +23,13 @@ public class VisaoUsuario {
                 System.out.println("\n╔════════════════════╗");
                 System.out.println("║    Menu Usuario    ║");
                 System.out.println("╚════════════════════╝\n");
+                System.out.println("Opcoes:");
                 System.out.println("1 - Cadastrar");
                 System.out.println("2 - Login");
                 System.out.println("3 - Mudar Senha");
                 System.out.println("0 - Sair");
-                System.out.print("Escolha: ");
-                opcao = console.nextInt();
-                console.nextLine();
+
+                opcao = Integer.parseInt(console.nextLine());
 
                 switch (opcao) {
                     case 1: telaCadastro(); break;
@@ -41,19 +43,24 @@ public class VisaoUsuario {
                 System.out.println("\n╔════════════════════════════════╗");
                 System.out.println("║ Meus Dados (" + usuarioLogado.getNome() + ") ║");
                 System.out.println("╚════════════════════════════════╝");
+                System.out.println("Opcoes:");
                 System.out.println("1 - Atualizar Meus Dados");
                 System.out.println("2 - Excluir Minha Conta");
                 System.out.println("0 - Logout (Sair da conta)");
                 System.out.print("Escolha: ");
-                opcao = console.nextInt();
-                console.nextLine(); 
+
+                opcao = Integer.parseInt(console.nextLine());
 
                 switch (opcao) {
-                    case 1: telaAtualizacao(); break;
-                    case 2: telaExclusao(); break;
+                    case 1:
+                        VisaoCurso visao = new VisaoCurso();
+                        visao.menuCurso(this.usuarioLogado.getID());
+                        break;
+                    case 2: telaAtualizacao(); break;
+                    case 3: telaExclusao(); break;
                     case 0: 
-                        usuarioLogado = null; 
                         System.out.println("Logout realizado.");
+                        this.usuarioLogado = null; 
                         opcao = -1; 
                         break;
                     default: System.out.println("Opção inválida."); break;
@@ -125,7 +132,7 @@ public class VisaoUsuario {
 
         System.out.print("Digite o pergunta secreta: ");
         String perguntaSecreta = console.nextLine();
-        
+
         System.out.print("Digite a resposta secreta: ");
         int respostaSecreta = console.nextLine().hashCode();
 
@@ -182,7 +189,7 @@ public class VisaoUsuario {
 
         if (confirmacao.equalsIgnoreCase("S")) {
             try {
-                boolean sucesso = controle.excluirUsuario(usuarioLogado.getID());
+                boolean sucesso = controle.excluirUsuario(this.usuarioLogado.getID());
                 if (sucesso) {
                     System.out.println("Conta excluída com sucesso!");
                     this.usuarioLogado = null;
