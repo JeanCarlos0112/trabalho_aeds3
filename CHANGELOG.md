@@ -38,13 +38,16 @@
 - Código não testado por falta de acesso ao computador (viagem Semana Santa).
 - O ArquivoUsuario dependia do ParEmailId para funcionar completamente.
 
-### Pendências
-#### LUIZ — Visão e Controle de Usuários
+### [2026-04-15] — LUIZ — Visão e Controle de Usuários
+#### Arquivos criados:
 
- - [ ] Criar entidades/usuarios/VisaoUsuario.java com métodos de entrada/saída de dados (ex: leUsuario(), mostraUsuario(), leLogin()).
- - [ ] Criar entidades/usuarios/ControleUsuario.java com menu "Meus Dados" e lógica de login, cadastro, alteração e exclusão.
- - [ ] No controle de exclusão de usuário: usar arqCurso.verificaUsuarioTemCursos(idUsuario) para impedir exclusão se houver cursos ativos. Se houver apenas cursos inativos (estado 2 ou 3), removê-los junto.
- - [ ] Implementar recuperação de senha via pergunta secreta.
+- entidades/usuarios/ControleUsuario.java — Controlador de usuários com validação de email único (cadastro/atualização), autenticação (login), recuperação de senha, e lógica restrita de exclusão (bloqueia se o usuário tiver cursos ativos e remove cursos inativos em cascata). 
+- entidades/usuarios/VisaoUsuario.java — Interface de linha de comando que gerencia a interação com o usuário. Contém o controle de sessão e os métodos de entrada/saída para as telas de cadastro, login, atualização, exclusão de conta e recuperação de senha. 
+
+#### Arquivos modificados:
+- entidades/usuarios/Usuario.java — Adicionado a função setHashSenha, para permitir a alteração da senha do usuário. 
+
+### Pendências
 
 #### ANDRÉ — Visão e Controle de Cursos
 
