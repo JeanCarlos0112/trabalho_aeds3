@@ -53,8 +53,12 @@ public class VisaoUsuario {
 
                 switch (opcao) {
                     case 1:
+                        try{
                         VisaoCurso visao = new VisaoCurso();
                         visao.menuCurso(this.usuarioLogado.getID());
+                        } catch (Exception e){
+                            System.out.println("Ocorreu um erro ao acessar cursos: " + e.getMessage());
+                        }
                         break;
                     case 2: telaAtualizacao(); break;
                     case 3: telaExclusao(); break;
