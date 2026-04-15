@@ -5,38 +5,61 @@ import java.util.Scanner;
 public class VisaoUsuario {
     private ControleUsuario controle;
     private Scanner console;
+    private Usuario usuarioLogado;
 
     public VisaoUsuario() throws Exception {
         this.controle = new ControleUsuario();
         this.console = new Scanner(System.in);
+        this.usuarioLogado = null;
     }
 
     public void menuUsuario() {
-        System.out.println("╔════════════════════╗");
-        System.out.println("║    Menu Usuario    ║");
-        System.out.println("╚════════════════════╝\n");
-        System.out.println("Opcoes:");
-        System.out.println("1 - Cadastrar");
-        System.out.println("2 - Login");
-        System.out.println("3 - Atualizar Usuario");
-        System.out.println("4 - Excluir Usuario");
-        switch (console.nextInt()) {
-            case 1:
-                telaCadastro();
-                break;
-            case 2:
-                telaLogin();
-                break;
-            case 3:
-                telaAtualização();
-                break;
-            case 4:
-                telaExclusao();
-                break;
-            default:
-                System.out.println("Opção inválida.");
-                break;
-        }
+        int opcao = -1;
+        do {
+            if (usuarioLogado == null) {
+                // Menu Deslogado
+                System.out.println("\n╔════════════════════╗");
+                System.out.println("║    Menu Usuario    ║");
+                System.out.println("╚════════════════════╝\n");
+                System.out.println("1 - Cadastrar");
+                System.out.println("2 - Login");
+                System.out.println("3 - Mudar Senha");
+                System.out.println("0 - Sair");
+                System.out.print("Escolha: ");
+                opcao = console.nextInt();
+                console.nextLine();
+
+                switch (opcao) {
+                    case 1: telaCadastro(); break;
+                    case 2: telaLogin(); break;
+                    case 3: telaRecuperacaoSenha(); break; // NOVA OPÇÃO
+                    case 0: System.out.println("Saindo..."); break;
+                    default: System.out.println("Opção inválida."); break;
+                }
+            } else {
+                // // Menu Logado
+                System.out.println("\n╔════════════════════════════════╗");
+                System.out.println("║ Meus Dados (" + usuarioLogado.getNome() + ") ║");
+                System.out.println("╚════════════════════════════════╝");
+                System.out.println("1 - Atualizar Meus Dados");
+                System.out.println("2 - Excluir Minha Conta");
+                System.out.println("0 - Logout (Sair da conta)");
+                System.out.print("Escolha: ");
+                opcao = console.nextInt();
+                console.nextLine(); 
+
+                switch (opcao) {
+                    case 1: telaAtualizacao(); break;
+                    case 2: telaExclusao(); break;
+                    case 0: 
+                        usuarioLogado = null; 
+                        System.out.println("Logout realizado.");
+                        opcao = -1; 
+                        break;
+                    default: System.out.println("Opção inválida."); break;
+                }
+            }
+        } while (opcao != 0);
     }
 
     public void telaCadastro() {
@@ -75,10 +98,8 @@ public class VisaoUsuario {
         System.out.print("Digite a senha: ");
         int senha = console.nextLine().hashCode();
 
-        Usuario usuarioLogado = new Usuario();
-
         try {
-            usuarioLogado = controle.logarUsuario(email, senha);
+            this.usuarioLogado = controle.logarUsuario(email, senha);
             
             if (usuarioLogado != null) {
                 System.out.println("Usuário logado com sucesso! Bem-vindo, " + usuarioLogado.getNome());
@@ -92,7 +113,7 @@ public class VisaoUsuario {
     }
 
     // primeira versão (vai ocorrer alteracoes)
-    public void telaAtualização() {
+    public void telaAtualizacao() {
         System.out.print("Digite o nome: ");
         String nome = console.nextLine();
 
@@ -101,20 +122,22 @@ public class VisaoUsuario {
 
         System.out.print("Digite o senha: ");
         int senha = console.nextLine().hashCode();
-        
+
         System.out.print("Digite o pergunta secreta: ");
         String perguntaSecreta = console.nextLine();
-
+        
         System.out.print("Digite a resposta secreta: ");
         int respostaSecreta = console.nextLine().hashCode();
 
         // 1. Instanciar o objeto COM o ID do usuário que está logando
         Usuario usuarioEditado = new Usuario(nome, email, senha, perguntaSecreta, respostaSecreta);
+        usuarioEditado.setID(usuarioLogado.getID());
 
         try {
             boolean sucesso = controle.atualizarUsuario(usuarioEditado);
             if (sucesso) {
                 System.out.println("Usuário atualizado com sucesso!");
+                this.usuarioLogado = usuarioEditado;
             } else {
                 System.out.println("Erro: O novo email escolhido já está em uso por outro usuário.");
             }
@@ -123,19 +146,54 @@ public class VisaoUsuario {
         }
     }
 
-    public void telaExclusao() {
-        System.out.print("Digite o ID do usuário que deseja excluir: ");
-        int id = console.nextInt();
-
+    public void telaRecuperacaoSenha() {
+        System.out.print("Digite o seu email: ");
+        String email = console.nextLine();
+        
         try {
-            boolean sucesso = controle.excluirUsuario(id);
+            String pergunta = controle.obterPerguntaSecreta(email);
+            if (pergunta == null) {
+                System.out.println("Erro: Email não encontrado.");
+                return; // Encerra o método se o email não existir
+            }
+
+            // Agora sim exibimos a pergunta para o usuário
+            System.out.println("Sua pergunta secreta é: " + pergunta);
+            System.out.print("Digite a resposta: ");
+            int resposta = console.nextLine().hashCode();
+
+            System.out.print("Digite a nova senha: ");
+            int novaSenha = console.nextLine().hashCode();
+            
+            boolean sucesso = controle.recuperarSenha(email, resposta, novaSenha);
             if (sucesso) {
-                System.out.println("Usuário e seus cursos inativos foram excluídos com sucesso!");
+                System.out.println("Senha alterada com sucesso! Você já pode fazer login.");
             } else {
-                System.out.println("Erro: O usuário possui cursos ativos e não pode ser excluído.");
+                System.out.println("Erro: Resposta secreta incorreta.");
             }
         } catch (Exception e) {
-            System.out.println("Ocorreu um erro no sistema: " + e.getMessage());
+            System.out.println("Ocorreu um erro: " + e.getMessage());
+        }
+    }
+
+    public void telaExclusao() {
+        System.out.print("Tem certeza que deseja excluir sua conta? (S/N): ");
+        String confirmacao = console.nextLine();
+
+        if (confirmacao.equalsIgnoreCase("S")) {
+            try {
+                boolean sucesso = controle.excluirUsuario(usuarioLogado.getID());
+                if (sucesso) {
+                    System.out.println("Conta excluída com sucesso!");
+                    this.usuarioLogado = null;
+                } else {
+                    System.out.println("Erro: Você possui cursos ativos e não pode excluir a conta.");
+                }
+            } catch (Exception e) {
+                System.out.println("Ocorreu um erro no sistema: " + e.getMessage());
+            }
+        } else {
+            System.out.println("Exclusão cancelada.");
         }
     }
 }

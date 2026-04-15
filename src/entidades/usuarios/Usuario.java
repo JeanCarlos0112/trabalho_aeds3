@@ -25,11 +25,15 @@ public class Usuario implements InterfaceEntidade {
         hashSenha = hs; perguntaSecreta = p; hashRespostaSecreta = hr;
     }
 
+    public void setHashSenha(int hashSenha) { this.hashSenha = hashSenha; }
+
     @Override public int getID() { return idUsuario; }
     @Override public void setID(int id) { this.idUsuario = id; }
     public String getEmail() { return email; }
     public String getNome() { return nome; }
     public int getHashSenha() { return hashSenha; }
+    public String getPerguntaSecreta() { return perguntaSecreta; }
+    public int getHashRespostaSecreta() { return hashRespostaSecreta; }
 
     @Override
     public byte[] toByteArray() throws Exception {

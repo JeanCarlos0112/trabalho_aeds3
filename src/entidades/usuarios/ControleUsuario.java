@@ -33,6 +33,17 @@ public class ControleUsuario {
         return null; // Credenciais inválidas
     }
 
+    public boolean recuperarSenha(String email, int hashResposta, int novaSenhaHash) throws Exception {
+        Usuario u = arqUsuario.readEmail(email);
+        
+        // Verifica se o usuário existe e se a resposta secreta bate
+        if (u != null && u.getHashRespostaSecreta() == hashResposta) {
+            u.setHashSenha(novaSenhaHash); // Certifique-se de ter este "setter" na classe Usuario
+            return arqUsuario.update(u);
+        }
+        return false;
+    }
+
     public boolean atualizarUsuario(Usuario usuarioEditado) throws Exception {
         Usuario usuarioExistente = arqUsuario.read(usuarioEditado.getID());
 
@@ -45,6 +56,11 @@ public class ControleUsuario {
     
         return arqUsuario.update(usuarioEditado);
     }
+
+    public String obterPerguntaSecreta(String email) throws Exception {
+        Usuario u = arqUsuario.readEmail(email);
+        return (u != null) ? u.getPerguntaSecreta() : null;
+    } 
 
     public boolean excluirUsuario(int idUsuario) throws Exception {
         // 1. Bloqueia se houver cursos ativos
