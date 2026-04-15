@@ -71,7 +71,9 @@ public class ControleUsuario {
         // 2. Remove todos os cursos inativos associados  ao usuário
         ArrayList<Curso> cursosDoUsuario = arqCurso.readAll(idUsuario);
         for (Curso c : cursosDoUsuario) {
-            arqCurso.delete(c.getID());
+            if (c.getEstado() == 2 || c.getEstado() == 3) {
+                arqCurso.delete(c.getID());
+            }
         }
 
         // 3. Remove o usuário
