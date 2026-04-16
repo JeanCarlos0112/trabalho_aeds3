@@ -12,6 +12,8 @@ As mudanças detalhadas e a checklist estará no arquivo ao final dessa seção,
 
 **01/04 — MIRO**: Criou as entidades, criou CRUD base (Usuario e Curso) e organizou pacote aed3 (Codigos que o professor forneceu para usar como base no desenvolvimento).
 
+**15/04 — LUIZ**: Criou a Visão e o Controle de usuários, implementando os menus de sessão (Logado/Deslogado), o sistema de recuperação de senha por pergunta secreta e a lógica de exclusão de conta com validação de cursos ativos.
+
 [Arquivo de changelog detalhado](https://github.com/JeanCarlos0112/trabalho_aeds3/blob/main/CHANGELOG.md)
 
 ## GUIA PARA A ESTRUTURA DE DIRETORIOS ATUAL, DO QUE FOI FEITO E DO QUE FAZER
