@@ -55,6 +55,6 @@ A classe de entrada é Principal, que abre os arquivos, instancia os controles/v
 - [x] O trabalho é original e não a cópia de um trabalho de outro grupo? Sim.
 
 ## ADICIONAIS
-Como membros deste grupo decidimos em colocar como o nosso grupo foi organizado aqui no **Github** e como mantemos a consistencia através de diversas implementações, tudo estará no arquivo `readme2.md` abaixo:
+Como membros deste grupo decidimos em colocar como o nosso grupo foi organizado aqui no **Github** e como mantemos a consistencia através de diversas implementações, tudo estará no arquivo `README2.md` abaixo:
 
-
+[Arquivo que usamos para organizar o nosso fluxo de trabalho](https://github.com/JeanCarlos0112/trabalho_aeds3/blob/main/README2.md)
