@@ -1,12 +1,18 @@
-# TRABALHO PRÁTICO AEDS III
+# TRABALHO PRÁTICO AEDs III - GRUPO 12
+
+## PARTICIPANTES
+- Jean
+- Miro
+- Luiz
+- André
 
 ## PROPOSTA
-A proposta é basicamente as informações previas que o professor passou pra gente estruturado em um markdown aqui no repositorio do github para facilitar o acesso a essas informações se precisar, vai estar tudo nesse arquivo a seguir:
+A proposta é basicamente as informações previas que o professor responsavel pela disciplina atual (Kutova) passou para gente estruturado em um markdown aqui no repositorio do github para facilitar o acesso a essas informações, se precisar, vai estar tudo nesse arquivo a seguir:
 
 [Proposta de trabalho do professor](https://github.com/JeanCarlos0112/trabalho_aeds3/blob/main/PROPOSTA.md)
 
-## CHANGELOG (O QUE FOI FEITO):
-As mudanças detalhadas e a checklist estará no arquivo ao final dessa seção, vou colocar um resumo do changelog só pra poder ficar de mais facil administração:
+## CHANGELOG:
+As mudanças detalhadas e a checklist estará no arquivo ao final dessa seção, irei colocar um resumo do changelog para poder ficar de mais facil visualização o que cada participante fez de forma resumida:
 
 **15/04 — ANDRÉ**: Criou a Visão e o Controle de cursos, implementando a listagem ordenada alfabeticamente, o sistema de geração automática de códigos NanoID e a lógica de persistência vinculada ao ID do usuário logado.
 
@@ -18,12 +24,12 @@ As mudanças detalhadas e a checklist estará no arquivo ao final dessa seção,
 
 [Arquivo de changelog detalhado](https://github.com/JeanCarlos0112/trabalho_aeds3/blob/main/CHANGELOG.md)
 
-## GUIA PARA A ESTRUTURA DE DIRETORIOS ATUAL, DO QUE FOI FEITO E DO QUE FAZER
-O arquivo contempla uma especie de guia para a estrutura de pastas que **MIRO** criou e eu (**JEAN**) organizei para ficar mais facil de visualizar o projeto e fazer implementação e/ou ajustes adicionais, além disso no guia também tem cada alteração de forma detalhada de como eu (**JEAN**) fiz cada coisa e algumas dicas para as outras partes, é bom dar uma olhada pode ser um bom começo para vocês, o guia estará no arquivo abaixo:
+## GUIA PARA A ESTRUTURA DE DIRETORIOS ATUAL
+O arquivo contempla uma especie de guia para a estrutura de pastas que o **MIRO** criou e o **JEAN** organizou para ficar mais facil de visualizar o projeto e fazer implementações futuras e/ou ajustes adicionais, além disso no guia também tem cada alteração de forma detalhada de como cada participante fez cada coisa:
 
 [Guia para a estrutura de pastas do projeto](https://github.com/JeanCarlos0112/trabalho_aeds3/blob/main/GUIA_ESTRUTURA.md)
 
-## To-Do List (O QUE DEVE SER FEITO):
+## To-Do List:
 
 - [x] Implementar o CRUD de Usuários. (Responsabilidade: **MIRO**)
 - [x] Implementar o CRUD de Cursos, assegurando que cada curso pertença a um usuário específico. (Responsabilidade: **MIRO**)
