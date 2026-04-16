@@ -47,7 +47,7 @@ projeto/
         └── indiceNomeCurso.btree.db           ← Árvore B+ por nome (ordem alfabética)
 ```
 
-## O que o eu (**JEAN**) entreguei (relacionamento 1:N)
+## O que o **JEAN** entregou (relacionamento 1:N)
 
 ### 1. `ParEmailId.java` → `entidades/usuarios/`
 
@@ -106,7 +106,7 @@ Então quando o André chamar `readAll(3)`, internamente acontece:
 
 ---
 
-## O que eu (LUIZ) entreguei (Interface e Controle de Usuário) 
+## O que o **LUIZ** entregou (Interface e Controle de Usuário) 
 
 ### 1. ControleUsuario.java → entidades/usuarios/ 
 
@@ -157,11 +157,9 @@ A lógica que implementei no excluirUsuario garante a integridade do banco de da
 3. Eu percorro a lista e deleto apenas os cursos que estão nos estados 2 (Concluído) ou 3 (Cancelado). 
 4. Ao final, o arqUsuario.delete aciona o índice do Jean, removendo o email da Hash Extensível automaticamente.
 
-Aqui está o conteúdo formatado em **Markdown**, pronto para você copiar e colar no seu relatório ou no GitHub:
-
 ---
 
-## O que eu (ANDRÉ) entreguei (Interface e Controle de Cursos)
+## O que o **ANDRÉ** entregou (Interface e Controle de Cursos)
 
 ### 1. ControleCurso.java → entidades/cursos/
 - Geração de NanoID — Cria automaticamente um código identificador de 10 caracteres alfanuméricos para cada curso, garantindo uma referência pública segura e única.
