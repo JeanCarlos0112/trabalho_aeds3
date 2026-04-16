@@ -7,12 +7,11 @@ import java.time.LocalDate;
 public class ControleCurso {
     private ArquivoCurso arqCurso;
 
-    public ControleCurso() throws Exception {
-        this.arqCurso = new ArquivoCurso();
+    public ControleCurso(ArquivoCurso arqCurso) throws Exception {
+        this.arqCurso = arqCurso;
     }
 
     public int cadastrarCurso(int idUsuario, String nome, String descricao) throws Exception {
-        // Geração do NanoID de 10 caracteres (alfanumérico)
         String alfabeto = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         StringBuilder nanoid = new StringBuilder();
         Random rnd = new Random();
@@ -40,9 +39,5 @@ public class ControleCurso {
 
     public Curso buscarCurso(int idCurso) throws Exception {
         return arqCurso.read(idCurso);
-    }
-
-    public void fechar() throws Exception {
-        arqCurso.close();
     }
 }

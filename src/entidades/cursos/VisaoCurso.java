@@ -7,9 +7,9 @@ public class VisaoCurso {
     private ControleCurso controle;
     private Scanner console;
 
-    public VisaoCurso() throws Exception {
-        this.controle = new ControleCurso();
-        this.console = new Scanner(System.in);
+    public VisaoCurso(ControleCurso controle, Scanner console) {
+        this.controle = controle;
+        this.console = console;
     }
 
     public void menuCurso(int idUsuarioLogado) {
@@ -24,9 +24,14 @@ public class VisaoCurso {
             System.out.println("3 - Atualizar Curso");
             System.out.println("4 - Excluir Curso");
             System.out.println("0 - Voltar ao Menu Anterior");
-            
-            // Uso de parseInt para evitar problemas com a quebra de linha do Scanner
-            opcao = Integer.parseInt(console.nextLine());
+
+            // FIX: try-catch no parseInt para evitar crash com entrada inválida
+            try {
+                opcao = Integer.parseInt(console.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println("Entrada invalida. Digite um numero.");
+                continue;
+            }
 
             switch (opcao) {
                 case 1:
@@ -41,8 +46,10 @@ public class VisaoCurso {
                 case 4:
                     telaExclusao(idUsuarioLogado);
                     break;
+                case 0:
+                    break;
                 default:
-                    System.out.println("Opção inválida.");
+                    System.out.println("Opcao invalida.");
                     break;
             }
         } while (opcao != 0);
@@ -50,7 +57,6 @@ public class VisaoCurso {
 
     public void telaListagem(int idUsuarioLogado) {
         try {
-            // Busca a lista ordenada alfabeticamente via índice secundário de nomes
             ArrayList<Curso> cursos = controle.listarCursosOrdenados(idUsuarioLogado);
             
             if (cursos.isEmpty()) {
@@ -72,7 +78,7 @@ public class VisaoCurso {
         System.out.print("Digite o nome do curso: ");
         String nome = console.nextLine();
 
-        System.out.print("Digite a descrição: ");
+        System.out.print("Digite a descricao: ");
         String descricao = console.nextLine();
 
         try {
@@ -85,37 +91,66 @@ public class VisaoCurso {
 
     public void telaAtualizacao(int idUsuarioLogado) {
         System.out.print("Digite o ID do curso que deseja atualizar: ");
-        int id = Integer.parseInt(console.nextLine());
+        int id;
+        try {
+            id = Integer.parseInt(console.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("ID invalido.");
+            return;
+        }
 
         try {
             Curso cursoExistente = controle.buscarCurso(id);
 
-            // Valida se o curso existe e pertence ao usuário logado
             if (cursoExistente != null && cursoExistente.getIdUsuario() == idUsuarioLogado) {
                 System.out.print("Novo nome (" + cursoExistente.getNome() + "): ");
                 String nome = console.nextLine();
-                System.out.print("Nova descrição: ");
+                System.out.print("Nova descricao: ");
                 String desc = console.nextLine();
-                System.out.print("Novo estado (0-Pendente, 1-Ativo, 2-Concluído): ");
-                int estado = Integer.parseInt(console.nextLine());
 
-                // Mantém o ID, FK, Data e o NanoID original
-                Curso editado = new Curso(id, idUsuarioLogado, nome, desc, cursoExistente.getDataInicio(), cursoExistente.getCodigo(), estado);
+                // FIX: Labels de estado corrigidos conforme README
+                System.out.println("Novo estado:");
+                System.out.println("  0 - Ativo (recebendo inscricoes)");
+                System.out.println("  1 - Ativo (inscricoes encerradas)");
+                System.out.println("  2 - Concluido");
+                System.out.println("  3 - Cancelado");
+                System.out.print("Escolha: ");
+                
+                int estado;
+                try {
+                    estado = Integer.parseInt(console.nextLine().trim());
+                    if (estado < 0 || estado > 3) {
+                        System.out.println("Estado invalido. Mantendo o anterior.");
+                        estado = cursoExistente.getEstado();
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Entrada invalida. Mantendo estado anterior.");
+                    estado = cursoExistente.getEstado();
+                }
+
+                Curso editado = new Curso(id, idUsuarioLogado, nome, desc,
+                    cursoExistente.getDataInicio(), cursoExistente.getCodigo(), estado);
 
                 if (controle.atualizarCurso(editado)) {
                     System.out.println("Curso atualizado com sucesso!");
                 }
             } else {
-                System.out.println("Erro: Curso não encontrado ou acesso negado.");
+                System.out.println("Erro: Curso nao encontrado ou acesso negado.");
             }
         } catch (Exception e) {
-            System.out.println("Erro na atualização: " + e.getMessage());
+            System.out.println("Erro na atualizacao: " + e.getMessage());
         }
     }
 
     public void telaExclusao(int idUsuarioLogado) {
         System.out.print("Digite o ID do curso que deseja excluir: ");
-        int id = Integer.parseInt(console.nextLine());
+        int id;
+        try {
+            id = Integer.parseInt(console.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("ID invalido.");
+            return;
+        }
 
         try {
             Curso c = controle.buscarCurso(id);
@@ -124,10 +159,10 @@ public class VisaoCurso {
                     System.out.println("Curso removido com sucesso!");
                 }
             } else {
-                System.out.println("Erro: Curso não encontrado ou sem permissão para excluir.");
+                System.out.println("Erro: Curso nao encontrado ou sem permissao para excluir.");
             }
         } catch (Exception e) {
-            System.out.println("Erro na exclusão: " + e.getMessage());
+            System.out.println("Erro na exclusao: " + e.getMessage());
         }
     }
 }

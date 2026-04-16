@@ -41,10 +41,11 @@ public class Curso implements InterfaceEntidade {
     
     public String getEstadoTexto() {
         switch(this.estado) {
-            case 1: return "Ativo";
-            case 2: return "Concluído";
-            case 3: return "Suspenso";
-            default: return "Pendente";
+            case 0: return "Ativo - Recebendo inscricoes";
+            case 1: return "Ativo - Inscricoes encerradas";
+            case 2: return "Concluido";
+            case 3: return "Cancelado";
+            default: return "Desconhecido";
         }
     }
 
