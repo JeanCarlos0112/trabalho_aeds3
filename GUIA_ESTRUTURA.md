@@ -106,14 +106,59 @@ Então quando o André chamar `readAll(3)`, internamente acontece:
 
 ---
 
+## O que eu (LUIZ) entreguei (Interface e Controle de Usuário) 
+
+### 1. ControleUsuario.java → entidades/usuarios/ 
+
+Funciona como o "cérebro" do sistema de usuários. Fazendo a ponte entre a interface e o arquivo de dados. Implementa as regras as seguintes regras: 
+- Validação de Email — Garante que dois usuários não tenham o mesmo email no cadastro ou na atualização. 
+- Segurança — Gerencia o login e a recuperação de senha comparando hashes, garantindo que a senha real nunca seja manipulada em texto aberto. 
+- Lógica de Exclusão — Implementa a trava de segurança; se o usuário tiver cursos ativos, a exclusão é abortada. 
+
+### 2. VisaoUsuario.java → entidades/usuarios/ 
+
+Sistema de menus dinâmico que gerencia o estado da sessão (usuário logado e deslogado). 
+- Menu Deslogado — Cadastro, Login e Recuperação de Senha. 
+- Menu Logado — Visualização, alteração de dados e exclusão de conta. 
+- UX de Recuperação — Diferente de um CRUD comum, a visão primeiro busca a pergunta secreta do usuário para só após a resposta correta do usuário para depois permitir a alteração da senha.
+
+| Método                             | O que faz                                               |
+|------------------------------------|---------------------------------------------------------|
+| `cadastrarUsuario` | Valida email único e cria nova entidade.         |
+| `recuperarSenha `| Valida resposta secreta e sobrescreve o hash da senha.             |
+| `excluirUsuario ` | Executa a limpeza em cascata (remove cursos inativos) após validação.  |
+| `obterPerguntaSecreta ` | Busca apenas a string da pergunta antes da validação da resposta.   |
+
+##Como funciona a Exclusão Segura na prática 
+
+```java
+public boolean excluirUsuario(int idUsuario) throws Exception {
+    // 1. Bloqueia se houver cursos ativos
+    if (arqCurso.verificaUsuarioTemCursos(idUsuario)) {
+        return false;   // A exclusão não é executada e retorna false 
+    }
+
+    // 2. Remove todos os cursos inativos associados  ao usuário
+    ArrayList<Curso> cursosDoUsuario = arqCurso.readAll(idUsuario);
+    for (Curso c : cursosDoUsuario) {
+        if (c.getEstado() == 2 || c.getEstado() == 3) {
+            arqCurso.delete(c.getID());
+        }
+    }
+
+    // 3. Remove o usuário
+    return arqUsuario.delete(idUsuario);
+}
+```
+
+A lógica que implementei no excluirUsuario garante a integridade do banco de dados evitando que um usuário "suma" deixando cursos ativos pendentes. O fluxo funciona assim: 
+1. Primeiro, chamo o método do Jean arqCurso.verificaUsuarioTemCursos(id). Se ele retornar true, eu interrompo tudo e aviso o usuário que ele tem pendências. 
+2. Se não houver cursos ativos, o código recupera todos os cursos vinculados àquele ID via readAll(idUsuario). 
+3. Eu percorro a lista e deleto apenas os cursos que estão nos estados 2 (Concluído) ou 3 (Cancelado). 
+4. Ao final, o arqUsuario.delete aciona o índice do Jean, removendo o email da Hash Extensível automaticamente.
+
+
 ## Notas para os outros membros
-
-### Para o LUIZ (ControleUsuario):
-
-- Use `arqCurso.verificaUsuarioTemCursos(idUsuario)` antes de permitir exclusão.
-- Se retornar `true`, não pode excluir. Avise o usuário.
-- O `ArquivoUsuario` já mantém o índice de email atualizado no delete/update.
-- O `Curso.java` tem `getEstado()` — estados: 0=ativo+inscrições, 1=ativo sem inscrições, 2=concluído, 3=cancelado.
 
 ### Para o ANDRÉ (ControleCurso):
 
