@@ -47,16 +47,15 @@
 #### Arquivos modificados:
 - entidades/usuarios/Usuario.java — Adicionado a função setHashSenha, para permitir a alteração da senha do usuário. 
 
+### [2026-04-15] — ANDRÉ — Visão e Controle de Cursos
+#### Arquivos criados:
+- entidades/cursos/ControleCurso.java — Controlador de cursos através da geração automática do NanoID de 10 caracteres no cadastro, vinculação do curso ao usuário logado e execução das operações de busca e exclusão através do arquivo de dados.
+- entidades/cursos/VisaoCurso.java — Interface de linha de comando que gerencia a interação relacionada aos cursos. Contém o menu de opções para o estudante e os métodos de entrada/saída para as telas de cadastro, exclusão, atualização de status e a listagem ordenada (alfabética) dos cursos vinculados ao usuário.
+
+#### Arquivos modificados:
+- entidades/cursos/Curso.java — Atualizado para incluir os métodos de acesso (getters/setters) necessários para a manipulação de metadados, como a descrição, o estado do curso e o código NanoID.
+
 ### Pendências
-
-#### ANDRÉ — Visão e Controle de Cursos
-
- - [ ] Criar entidades/cursos/VisaoCurso.java com métodos de entrada/saída de dados (ex: leCurso(), mostraCurso()).
- - [ ] Criar entidades/cursos/ControleCurso.java com menu "Meus Cursos" e lógica de inclusão, alteração, visualização e gerenciamento de estado.
- - [ ] Usar arqCurso.readAllOrdenadoPorNome(idUsuarioAtivo) para montar o menu de cursos em ordem alfabética.
- - [ ] Gerar código NanoID de 10 caracteres alfanuméricos ao criar curso novo.
- - [ ] Implementar mudanças de estado: encerrar inscrições (0→1), concluir (→2), cancelar/excluir (→3 ou delete).
- - [ ] Adicionar getters faltantes em Curso.java: getDescricao(), getDataInicio(), getCodigo(), getEstado(), setEstado(int).
 
 ### TODOS — Integração final
 

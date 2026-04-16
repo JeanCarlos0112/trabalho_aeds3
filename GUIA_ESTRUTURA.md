@@ -157,15 +157,46 @@ A lógica que implementei no excluirUsuario garante a integridade do banco de da
 3. Eu percorro a lista e deleto apenas os cursos que estão nos estados 2 (Concluído) ou 3 (Cancelado). 
 4. Ao final, o arqUsuario.delete aciona o índice do Jean, removendo o email da Hash Extensível automaticamente.
 
+Aqui está o conteúdo formatado em **Markdown**, pronto para você copiar e colar no seu relatório ou no GitHub:
 
-## Notas para os outros membros
+---
 
-### Para o ANDRÉ (ControleCurso):
+## O que eu (ANDRÉ) entreguei (Interface e Controle de Cursos)
 
-- Use `arqCurso.readAllOrdenadoPorNome(idUsuarioAtivo)` para montar o menu de cursos.
-- Use `arqCurso.create(curso)` normalmente — o índice 1:N é mantido automaticamente.
-- O `Curso.java` precisa de getters adicionais que o Miro ainda não colocou. Adicionem:
-  - `getDescricao()`, `getDataInicio()`, `getCodigo()`, `getEstado()`
-  - `setEstado(int e)` — para mudar o estado do curso
-  - `getEstadoTexto()` — opcional, retorna texto legível do estado
-- Lembrem de gerar o código NanoID de 10 caracteres ao criar um curso novo.
+### 1. ControleCurso.java → entidades/cursos/
+- Geração de NanoID — Cria automaticamente um código identificador de 10 caracteres alfanuméricos para cada curso, garantindo uma referência pública segura e única.
+- Vínculo de Propriedade (FK) — Garante que todo curso criado seja obrigatoriamente associado ao ID do usuário que está logado, mantendo a integridade do relacionamento 1:N.
+- Gestão de Estados — Controla a lógica de transição entre os estados de progresso (Pendente, Ativo e Concluído) antes da gravação no arquivo.
+
+### 2. VisaoCurso.java → entidades/cursos/
+Sistema de interface via console focado na gestão do catálogo de estudos do usuário.
+- Listagem Ordenada — Diferente de uma leitura sequencial, utiliza o índice secundário de nomes para apresentar os cursos em ordem alfabética diretamente para o estudante.
+- UX de Gestão — Centraliza as operações de cadastro, atualização de descrições e alteração de status em um menu intuitivo.
+- Segurança na Camada de Visão — Valida a propriedade do curso antes de permitir edições ou exclusões, impedindo que um usuário manipule dados de terceiros.
+
+| Método | O que faz |
+| :--- | :--- |
+| `cadastrarCurso` | Gera o NanoID, define a data atual e vincula o curso ao usuário ativo. |
+| `listarCursosOrdenados` | Recupera a lista filtrada por usuário e organizada alfabeticamente via Árvore B+. |
+| `atualizarCurso` | Permite editar nome, descrição e estado, preservando o NanoID e a data original. |
+| `excluirCurso` | Remove o registro e limpa automaticamente os índices secundários de nome e usuário. |
+
+## Como funciona a Geração de Código e Listagem na prática
+
+```java
+public int cadastrarCurso(int idUsuario, String nome, String descricao) throws Exception {
+    // 1. Geração do NanoID de 10 caracteres
+    String alfabeto = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    StringBuilder nanoid = new StringBuilder();
+    Random rnd = new Random();
+    for (int i = 0; i < 10; i++) {
+        nanoid.append(alfabeto.charAt(rnd.nextInt(alfabeto.length())));
+    }
+
+    // 2. Criação do objeto com estado inicial 0 (Pendente)
+    Curso novo = new Curso(idUsuario, nome, descricao, LocalDate.now(), nanoid.toString(), 0);
+    
+    // 3. Persistência e atualização automática dos índices do Jean
+    return arqCurso.create(novo);
+}
+```
