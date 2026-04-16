@@ -1,14 +1,9 @@
 import java.util.Scanner;
-
 import entidades.usuarios.*;
 import entidades.cursos.*;
 
 public class Principal {
     public static void main(String[] args) {
-        System.out.println("===========================");
-        System.out.println("  Menu Inicial - Grupo 12  ");
-        System.out.println("===========================");
-
         ArquivoUsuario arqUsuario = null;
         ArquivoCurso arqCurso = null;
         Scanner console = new Scanner(System.in);
@@ -45,6 +40,6 @@ public class Principal {
             console.close();
         }
 
-        System.out.println("Sistema encerrado. Ate mais!");
+        System.out.println("\nSistema encerrado. Ate mais!");
     }
 }

@@ -1,9 +1,27 @@
 package entidades.cursos;
 
-import java.util.Scanner;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Scanner;
 
+/**
+ * Visão de Cursos — menu e telas de entrada/saída.
+ *
+ * Fluxo conforme PROPOSTA.md:
+ *   - menuCurso: lista cursos do usuário em ORDEM ALFABÉTICA com
+ *     número sequencial; digitar o número abre a tela de detalhe;
+ *     (A) cria novo curso; (R) retorna.
+ *   - telaDetalheCurso: exibe todos os dados e as opções A–E:
+ *       (A) Gerenciar inscritos  [placeholder TP2]
+ *       (B) Corrigir dados do curso
+ *       (C) Encerrar inscrições  (estado 0 -> 1)
+ *       (D) Concluir curso       (estado 0/1 -> 2)
+ *       (E) Cancelar curso       (no TP1, sem inscrições, exclui)
+ *       (R) Retornar
+ */
 public class VisaoCurso {
+    private static final DateTimeFormatter FMT_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
     private ControleCurso controle;
     private Scanner console;
 
@@ -12,157 +30,240 @@ public class VisaoCurso {
         this.console = console;
     }
 
+    // =================================================================
+    //  MENU "MEUS CURSOS"
+    // =================================================================
     public void menuCurso(int idUsuarioLogado) {
-        int opcao = -1;
-        do {
-            System.out.println("\n╔════════════════════╗");
-            System.out.println("║    Menu Cursos     ║");
-            System.out.println("╚════════════════════╝\n");
-            System.out.println("Opcoes:");
-            System.out.println("1 - Listar Meus Cursos");
-            System.out.println("2 - Cadastrar Novo Curso");
-            System.out.println("3 - Atualizar Curso");
-            System.out.println("4 - Excluir Curso");
-            System.out.println("0 - Voltar ao Menu Anterior");
-
-            // FIX: try-catch no parseInt para evitar crash com entrada inválida
+        while (true) {
+            ArrayList<Curso> cursos;
             try {
-                opcao = Integer.parseInt(console.nextLine().trim());
-            } catch (NumberFormatException e) {
-                System.out.println("Entrada invalida. Digite um numero.");
-                continue;
+                cursos = controle.listarCursosOrdenados(idUsuarioLogado);
+            } catch (Exception e) {
+                System.out.println("Erro ao listar cursos: " + e.getMessage());
+                return;
             }
 
-            switch (opcao) {
-                case 1:
-                    telaListagem(idUsuarioLogado);
-                    break;
-                case 2:
-                    telaCadastro(idUsuarioLogado);
-                    break;
-                case 3:
-                    telaAtualizacao(idUsuarioLogado);
-                    break;
-                case 4:
-                    telaExclusao(idUsuarioLogado);
-                    break;
-                case 0:
-                    break;
-                default:
-                    System.out.println("Opcao invalida.");
-                    break;
-            }
-        } while (opcao != 0);
-    }
+            System.out.println("\nG12 TP1 1.2");
+            System.out.println("--------------");
+            System.out.println("> Inicio > Meus Cursos\n");
+            System.out.println("CURSOS");
 
-    public void telaListagem(int idUsuarioLogado) {
-        try {
-            ArrayList<Curso> cursos = controle.listarCursosOrdenados(idUsuarioLogado);
-            
             if (cursos.isEmpty()) {
-                System.out.println("Nenhum curso cadastrado.");
+                System.out.println("(Nenhum curso cadastrado.)");
             } else {
-                System.out.println("\n--- LISTA DE CURSOS ---");
                 for (int i = 0; i < cursos.size(); i++) {
                     Curso c = cursos.get(i);
-                    System.out.println((i + 1) + ". [" + c.getCodigo() + "] " + c.getNome());
-                    System.out.println("   ID: " + c.getID() + " | Status: " + c.getEstadoTexto());
+                    System.out.println("(" + (i + 1) + ") " + c.getNome()
+                        + " - " + c.getDataInicio().format(FMT_DATA));
                 }
             }
-        } catch (Exception e) {
-            System.out.println("Erro ao listar cursos: " + e.getMessage());
+
+            System.out.println();
+            System.out.println("(A) Novo curso");
+            System.out.println("(R) Retornar ao menu anterior");
+            System.out.print("\nOpcao: ");
+
+            String opcao = console.nextLine().trim();
+            if (opcao.isEmpty()) continue;
+
+            if (opcao.equalsIgnoreCase("A")) {
+                telaNovoCurso(idUsuarioLogado);
+            } else if (opcao.equalsIgnoreCase("R")) {
+                return;
+            } else {
+                // Tenta interpretar como número sequencial do curso
+                int num;
+                try {
+                    num = Integer.parseInt(opcao);
+                } catch (NumberFormatException e) {
+                    System.out.println("Opcao invalida.");
+                    continue;
+                }
+                if (num >= 1 && num <= cursos.size()) {
+                    telaDetalheCurso(cursos.get(num - 1).getID());
+                } else {
+                    System.out.println("Numero fora do intervalo.");
+                }
+            }
         }
     }
 
-    public void telaCadastro(int idUsuarioLogado) {
-        System.out.print("Digite o nome do curso: ");
+    // =================================================================
+    //  TELA "NOVO CURSO"
+    // =================================================================
+    public void telaNovoCurso(int idUsuarioLogado) {
+        System.out.println("\nG12 TP1 1.2");
+        System.out.println("--------------");
+        System.out.println("> Inicio > Meus Cursos > Novo Curso\n");
+
+        System.out.print("Nome do curso: ");
         String nome = console.nextLine();
 
-        System.out.print("Digite a descricao: ");
+        System.out.print("Descricao (programa, dias, locais, ...): ");
         String descricao = console.nextLine();
 
         try {
             int idGerado = controle.cadastrarCurso(idUsuarioLogado, nome, descricao);
-            System.out.println("Curso cadastrado com sucesso! ID: " + idGerado);
+            System.out.println("\nCurso cadastrado com sucesso! (ID interno: " + idGerado + ")");
         } catch (Exception e) {
             System.out.println("Erro ao cadastrar: " + e.getMessage());
         }
     }
 
-    public void telaAtualizacao(int idUsuarioLogado) {
-        System.out.print("Digite o ID do curso que deseja atualizar: ");
-        int id;
-        try {
-            id = Integer.parseInt(console.nextLine().trim());
-        } catch (NumberFormatException e) {
-            System.out.println("ID invalido.");
-            return;
-        }
-
-        try {
-            Curso cursoExistente = controle.buscarCurso(id);
-
-            if (cursoExistente != null && cursoExistente.getIdUsuario() == idUsuarioLogado) {
-                System.out.print("Novo nome (" + cursoExistente.getNome() + "): ");
-                String nome = console.nextLine();
-                System.out.print("Nova descricao: ");
-                String desc = console.nextLine();
-
-                // FIX: Labels de estado corrigidos conforme README
-                System.out.println("Novo estado:");
-                System.out.println("  0 - Ativo (recebendo inscricoes)");
-                System.out.println("  1 - Ativo (inscricoes encerradas)");
-                System.out.println("  2 - Concluido");
-                System.out.println("  3 - Cancelado");
-                System.out.print("Escolha: ");
-                
-                int estado;
-                try {
-                    estado = Integer.parseInt(console.nextLine().trim());
-                    if (estado < 0 || estado > 3) {
-                        System.out.println("Estado invalido. Mantendo o anterior.");
-                        estado = cursoExistente.getEstado();
-                    }
-                } catch (NumberFormatException e) {
-                    System.out.println("Entrada invalida. Mantendo estado anterior.");
-                    estado = cursoExistente.getEstado();
-                }
-
-                Curso editado = new Curso(id, idUsuarioLogado, nome, desc,
-                    cursoExistente.getDataInicio(), cursoExistente.getCodigo(), estado);
-
-                if (controle.atualizarCurso(editado)) {
-                    System.out.println("Curso atualizado com sucesso!");
-                }
-            } else {
-                System.out.println("Erro: Curso nao encontrado ou acesso negado.");
+    // =================================================================
+    //  TELA DE DETALHE DO CURSO — opções A, B, C, D, E, R
+    // =================================================================
+    public void telaDetalheCurso(int idCurso) {
+        while (true) {
+            Curso c;
+            try {
+                c = controle.buscarCurso(idCurso);
+            } catch (Exception e) {
+                System.out.println("Erro ao ler curso: " + e.getMessage());
+                return;
             }
-        } catch (Exception e) {
-            System.out.println("Erro na atualizacao: " + e.getMessage());
+            if (c == null) {
+                System.out.println("Curso nao encontrado (pode ter sido removido).");
+                return;
+            }
+
+            System.out.println("\nG12 TP1 1.2");
+            System.out.println("--------------");
+            System.out.println("> Inicio > Meus Cursos > " + c.getNome() + "\n");
+
+            System.out.println("CODIGO........: " + c.getCodigo());
+            System.out.println("NOME..........: " + c.getNome());
+            System.out.println("DESCRICAO.....: " + c.getDescricao());
+            System.out.println("DATA DE INICIO: " + c.getDataInicio().format(FMT_DATA));
+            System.out.println("ESTADO........: " + c.getEstadoTexto());
+
+            System.out.println();
+            // Mensagem contextual por estado
+            switch (c.getEstado()) {
+                case 0: System.out.println("Este curso esta aberto para inscricoes!"); break;
+                case 1: System.out.println("Este curso ja nao aceita novas inscricoes."); break;
+                case 2: System.out.println("Este curso ja foi concluido."); break;
+                case 3: System.out.println("Este curso foi cancelado."); break;
+            }
+            System.out.println();
+
+            System.out.println("(A) Gerenciar inscritos no curso");
+            System.out.println("(B) Corrigir dados do curso");
+            if (c.getEstado() == 0) {
+                System.out.println("(C) Encerrar inscricoes");
+            }
+            if (c.getEstado() == 0 || c.getEstado() == 1) {
+                System.out.println("(D) Concluir curso");
+            }
+            if (c.getEstado() != 3 && c.getEstado() != 2) {
+                System.out.println("(E) Cancelar curso");
+            }
+            System.out.println("(R) Retornar ao menu anterior");
+            System.out.print("\nOpcao: ");
+
+            String opcao = console.nextLine().trim().toUpperCase();
+            try {
+                switch (opcao) {
+                    case "A":
+                        System.out.println("\n(Funcionalidade de gerenciamento de inscritos sera implementada no TP2.)");
+                        break;
+                    case "B":
+                        telaCorrecaoDados(c);
+                        break;
+                    case "C":
+                        if (c.getEstado() == 0) {
+                            c.setEstado(1);
+                            if (controle.atualizarCurso(c))
+                                System.out.println("\nInscricoes encerradas com sucesso.");
+                        } else {
+                            System.out.println("Operacao nao permitida para o estado atual.");
+                        }
+                        break;
+                    case "D":
+                        if (c.getEstado() == 0 || c.getEstado() == 1) {
+                            c.setEstado(2);
+                            if (controle.atualizarCurso(c))
+                                System.out.println("\nCurso marcado como concluido.");
+                        } else {
+                            System.out.println("Operacao nao permitida para o estado atual.");
+                        }
+                        break;
+                    case "E":
+                        if (c.getEstado() == 2 || c.getEstado() == 3) {
+                            System.out.println("Curso ja encerrado; nao pode ser cancelado novamente.");
+                            break;
+                        }
+                        System.out.print("Confirma o cancelamento do curso? (S/N): ");
+                        String conf = console.nextLine().trim();
+                        if (conf.equalsIgnoreCase("S")) {
+                            // PROPOSTA: "Só podemos excluir um curso se não houver nenhum aluno inscrito nele.
+                            // [...] Se não houver, o curso pode ser excluído, mas, se houver, o curso deve ser
+                            // registrado como cancelado."
+                            //
+                            // No TP1 não há inscrições implementadas: o conjunto de inscritos é sempre vazio,
+                            // portanto o curso pode ser EXCLUÍDO. Quando o TP2 adicionar inscrições, bastará
+                            // trocar a condição por "se houver inscritos -> setEstado(3)".
+                            if (controle.excluirCurso(c.getID())) {
+                                System.out.println("\nCurso cancelado e removido do sistema (nenhum inscrito).");
+                                return; // volta ao menu de cursos
+                            } else {
+                                System.out.println("Falha ao cancelar o curso.");
+                            }
+                        } else {
+                            System.out.println("Cancelamento abortado.");
+                        }
+                        break;
+                    case "R":
+                        return;
+                    default:
+                        System.out.println("Opcao invalida.");
+                }
+            } catch (Exception e) {
+                System.out.println("Erro: " + e.getMessage());
+            }
         }
     }
 
-    public void telaExclusao(int idUsuarioLogado) {
-        System.out.print("Digite o ID do curso que deseja excluir: ");
-        int id;
-        try {
-            id = Integer.parseInt(console.nextLine().trim());
-        } catch (NumberFormatException e) {
-            System.out.println("ID invalido.");
-            return;
+    // =================================================================
+    //  TELA "CORRIGIR DADOS DO CURSO"
+    //  Edita apenas nome, descrição e data. O estado é controlado
+    //  pelas opções C/D/E. Código (NanoID) e idUsuario são imutáveis.
+    // =================================================================
+    private void telaCorrecaoDados(Curso c) {
+        System.out.println("\nG12 TP1 1.2");
+        System.out.println("--------------");
+        System.out.println("> Inicio > Meus Cursos > " + c.getNome() + " > Corrigir Dados\n");
+        System.out.println("(Deixe em branco para manter o valor atual.)\n");
+
+        System.out.print("Nome (" + c.getNome() + "): ");
+        String nome = console.nextLine();
+        if (nome.trim().isEmpty()) nome = c.getNome();
+
+        System.out.print("Descricao atual: " + c.getDescricao() + "\n");
+        System.out.print("Nova descricao: ");
+        String desc = console.nextLine();
+        if (desc.trim().isEmpty()) desc = c.getDescricao();
+
+        System.out.print("Data de inicio (" + c.getDataInicio().format(FMT_DATA) + ") [dd/MM/yyyy]: ");
+        String dataStr = console.nextLine().trim();
+        java.time.LocalDate data = c.getDataInicio();
+        if (!dataStr.isEmpty()) {
+            try {
+                data = java.time.LocalDate.parse(dataStr, FMT_DATA);
+            } catch (Exception e) {
+                System.out.println("Data invalida. Mantendo a anterior.");
+            }
         }
 
+        Curso editado = new Curso(c.getID(), c.getIdUsuario(), nome, desc, data,
+                                  c.getCodigo(), c.getEstado());
         try {
-            Curso c = controle.buscarCurso(id);
-            if (c != null && c.getIdUsuario() == idUsuarioLogado) {
-                if (controle.excluirCurso(id)) {
-                    System.out.println("Curso removido com sucesso!");
-                }
-            } else {
-                System.out.println("Erro: Curso nao encontrado ou sem permissao para excluir.");
-            }
+            if (controle.atualizarCurso(editado))
+                System.out.println("\nDados do curso atualizados.");
+            else
+                System.out.println("\nFalha ao atualizar.");
         } catch (Exception e) {
-            System.out.println("Erro na exclusao: " + e.getMessage());
+            System.out.println("Erro: " + e.getMessage());
         }
     }
 }

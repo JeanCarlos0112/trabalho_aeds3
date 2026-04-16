@@ -4,6 +4,23 @@ import java.util.Scanner;
 
 import entidades.cursos.VisaoCurso;
 
+/**
+ * Visão de Usuário — menu principal e telas de login/cadastro/meus dados.
+ *
+ * Fluxo conforme PROPOSTA.md:
+ *
+ *   Tela inicial (deslogado):
+ *     (A) Login
+ *     (B) Novo usuario
+ *     (C) Recuperar senha
+ *     (S) Sair
+ *
+ *   Tela principal (logado):
+ *     (A) Meus dados
+ *     (B) Meus cursos
+ *     (C) Minhas inscricoes   [placeholder TP2]
+ *     (S) Sair (logout)
+ */
 public class VisaoUsuario {
     private ControleUsuario controle;
     private VisaoCurso visaoCurso;
@@ -17,133 +34,198 @@ public class VisaoUsuario {
         this.usuarioLogado = null;
     }
 
+    // =================================================================
+    //  LOOP PRINCIPAL DO MENU
+    // =================================================================
     public void menuUsuario() {
-        int opcao = -1;
-        do {
+        while (true) {
             if (usuarioLogado == null) {
-                System.out.println("\n╔════════════════════╗");
-                System.out.println("║    Menu Usuario    ║");
-                System.out.println("╚════════════════════╝\n");
-                System.out.println("Opcoes:");
-                System.out.println("1 - Cadastrar");
-                System.out.println("2 - Login");
-                System.out.println("3 - Mudar Senha");
-                System.out.println("0 - Sair");
-
-                // FIX: try-catch no parseInt
-                try {
-                    opcao = Integer.parseInt(console.nextLine().trim());
-                } catch (NumberFormatException e) {
-                    System.out.println("Entrada invalida. Digite um numero.");
-                    continue;
-                }
-
-                switch (opcao) {
-                    case 1: telaCadastro(); break;
-                    case 2: telaLogin(); break;
-                    case 3: telaRecuperacaoSenha(); break;
-                    case 0: System.out.println("Saindo..."); break;
-                    default: System.out.println("Opcao invalida."); break;
-                }
+                if (!menuDeslogado()) return; // usuário escolheu sair
             } else {
-                System.out.println("\n╔════════════════════════════════╗");
-                System.out.println("║ Meus Dados (" + usuarioLogado.getNome() + ")");
-                System.out.println("╚════════════════════════════════╝");
-                System.out.println("Opcoes:");
-                System.out.println("1 - Cursos");
-                System.out.println("2 - Atualizar Meus Dados");
-                System.out.println("3 - Excluir Minha Conta");
-                System.out.println("0 - Logout (Sair da conta)");
-                System.out.print("Escolha: ");
-
-                try {
-                    opcao = Integer.parseInt(console.nextLine().trim());
-                } catch (NumberFormatException e) {
-                    System.out.println("Entrada invalida. Digite um numero.");
-                    continue;
-                }
-
-                switch (opcao) {
-                    case 1:
-                        // FIX: Usa a instância compartilhada de VisaoCurso
-                        visaoCurso.menuCurso(this.usuarioLogado.getID());
-                        break;
-                    case 2: telaAtualizacao(); break;
-                    case 3: telaExclusao(); break;
-                    case 0: 
-                        System.out.println("Logout realizado.");
-                        this.usuarioLogado = null; 
-                        opcao = -1; 
-                        break;
-                    default: System.out.println("Opcao invalida."); break;
+                if (!menuLogado()) {
+                    this.usuarioLogado = null;  // logout
                 }
             }
-        } while (opcao != 0);
+        }
     }
 
+    // =================================================================
+    //  MENU INICIAL (deslogado)
+    //  Retorna false quando o usuário escolhe "Sair".
+    // =================================================================
+    private boolean menuDeslogado() {
+        System.out.println("\nG12 TP1 1.2");
+        System.out.println("--------------\n");
+        System.out.println("(A) Login");
+        System.out.println("(B) Novo usuario");
+        System.out.println("(C) Recuperar senha");
+        System.out.println("\n(S) Sair");
+        System.out.print("\nOpcao: ");
+
+        String op = console.nextLine().trim().toUpperCase();
+        switch (op) {
+            case "A": telaLogin(); return true;
+            case "B": telaCadastro(); return true;
+            case "C": telaRecuperacaoSenha(); return true;
+            case "S":
+                System.out.println("\nSaindo do sistema...");
+                return false;
+            default:
+                System.out.println("Opcao invalida.");
+                return true;
+        }
+    }
+
+    // =================================================================
+    //  MENU PRINCIPAL (logado)
+    //  Retorna false quando o usuário faz logout ou exclui a conta.
+    // =================================================================
+    private boolean menuLogado() {
+        System.out.println("\nG12 TP1 1.2");
+        System.out.println("--------------");
+        System.out.println("> Inicio  (usuario: " + usuarioLogado.getNome() + ")\n");
+        System.out.println("(A) Meus dados");
+        System.out.println("(B) Meus cursos");
+        System.out.println("(C) Minhas inscricoes");
+        System.out.println("(S) Sair (logout)");
+        System.out.print("\nOpcao: ");
+
+        String op = console.nextLine().trim().toUpperCase();
+        switch (op) {
+            case "A":
+                return telaMeusDados(); // retorna false se a conta foi excluída
+            case "B":
+                visaoCurso.menuCurso(usuarioLogado.getID());
+                return true;
+            case "C":
+                System.out.println("\n(Minhas inscricoes sera implementado no TP2.)");
+                return true;
+            case "S":
+                System.out.println("\nLogout realizado.");
+                return false;
+            default:
+                System.out.println("Opcao invalida.");
+                return true;
+        }
+    }
+
+    // =================================================================
+    //  TELA "MEUS DADOS" — exibe dados e oferece editar/excluir conta
+    //  Retorna false se a conta foi excluída (obriga logout).
+    // =================================================================
+    private boolean telaMeusDados() {
+        while (true) {
+            System.out.println("\nG12 TP1 1.2");
+            System.out.println("--------------");
+            System.out.println("> Inicio > Meus Dados\n");
+            System.out.println("NOME.....: " + usuarioLogado.getNome());
+            System.out.println("EMAIL....: " + usuarioLogado.getEmail());
+            System.out.println("PERGUNTA.: " + usuarioLogado.getPerguntaSecreta());
+            System.out.println();
+            System.out.println("(A) Editar dados");
+            System.out.println("(B) Excluir minha conta");
+            System.out.println("(R) Retornar ao menu anterior");
+            System.out.print("\nOpcao: ");
+
+            String op = console.nextLine().trim().toUpperCase();
+            switch (op) {
+                case "A":
+                    telaAtualizacao();
+                    break;
+                case "B":
+                    if (telaExclusao()) return false;  // conta excluída
+                    break;
+                case "R":
+                    return true;
+                default:
+                    System.out.println("Opcao invalida.");
+            }
+        }
+    }
+
+    // =================================================================
+    //  TELAS DE ENTRADA/SAÍDA
+    // =================================================================
     public void telaCadastro() {
-        System.out.print("Digite o nome: ");
+        System.out.println("\nG12 TP1 1.2");
+        System.out.println("--------------");
+        System.out.println("> Inicio > Novo Usuario\n");
+
+        System.out.print("Nome: ");
         String nome = console.nextLine();
 
-        System.out.print("Digite o email: ");
+        System.out.print("Email: ");
         String email = console.nextLine();
 
-        System.out.print("Digite a senha: ");
+        System.out.print("Senha: ");
         int senha = console.nextLine().hashCode();
-        
-        System.out.print("Digite a pergunta secreta: ");
+
+        System.out.print("Pergunta secreta: ");
         String perguntaSecreta = console.nextLine();
 
-        System.out.print("Digite a resposta secreta: ");
+        System.out.print("Resposta secreta: ");
         int respostaSecreta = console.nextLine().hashCode();
 
         try {
             boolean sucesso = controle.cadastrarUsuario(nome, email, senha, perguntaSecreta, respostaSecreta);
             if (sucesso) {
-                System.out.println("Usuario cadastrado com sucesso!");
+                System.out.println("\nUsuario cadastrado com sucesso! Use a opcao (A) para fazer login.");
             } else {
-                System.out.println("Erro: Este email ja esta cadastrado no sistema.");            
+                System.out.println("\nErro: Este email ja esta cadastrado no sistema.");
             }
         } catch (Exception e) {
-            System.out.println("Ocorreu um erro no sistema: " + e.getMessage());
+            System.out.println("\nErro no sistema: " + e.getMessage());
         }
     }
 
     public void telaLogin() {
-        System.out.print("Digite o email: ");
+        System.out.println("\nG12 TP1 1.2");
+        System.out.println("--------------");
+        System.out.println("> Inicio > Login\n");
+
+        System.out.print("Email: ");
         String email = console.nextLine();
 
-        System.out.print("Digite a senha: ");
+        System.out.print("Senha: ");
         int senha = console.nextLine().hashCode();
 
         try {
             this.usuarioLogado = controle.logarUsuario(email, senha);
-            
             if (usuarioLogado != null) {
-                System.out.println("Usuario logado com sucesso! Bem-vindo, " + usuarioLogado.getNome());
+                System.out.println("\nBem-vindo, " + usuarioLogado.getNome() + "!");
             } else {
-                System.out.println("Erro: Email e/ou senha invalidos");
+                System.out.println("\nEmail e/ou senha invalidos.");
             }
         } catch (Exception e) {
-            System.out.println("Ocorreu um erro no sistema: " + e.getMessage());
+            System.out.println("\nErro no sistema: " + e.getMessage());
         }
     }
 
     public void telaAtualizacao() {
-        System.out.print("Digite o nome: ");
+        System.out.println("\nG12 TP1 1.2");
+        System.out.println("--------------");
+        System.out.println("> Inicio > Meus Dados > Editar\n");
+        System.out.println("(Deixe em branco para manter o valor atual.)\n");
+
+        System.out.print("Nome (" + usuarioLogado.getNome() + "): ");
         String nome = console.nextLine();
+        if (nome.trim().isEmpty()) nome = usuarioLogado.getNome();
 
-        System.out.print("Digite o email: ");
+        System.out.print("Email (" + usuarioLogado.getEmail() + "): ");
         String email = console.nextLine();
+        if (email.trim().isEmpty()) email = usuarioLogado.getEmail();
 
-        System.out.print("Digite a senha: ");
-        int senha = console.nextLine().hashCode();
+        System.out.print("Nova senha (em branco = manter): ");
+        String senhaTxt = console.nextLine();
+        int senha = senhaTxt.isEmpty() ? usuarioLogado.getHashSenha() : senhaTxt.hashCode();
 
-        System.out.print("Digite a pergunta secreta: ");
+        System.out.print("Pergunta secreta (" + usuarioLogado.getPerguntaSecreta() + "): ");
         String perguntaSecreta = console.nextLine();
+        if (perguntaSecreta.trim().isEmpty()) perguntaSecreta = usuarioLogado.getPerguntaSecreta();
 
-        System.out.print("Digite a resposta secreta: ");
-        int respostaSecreta = console.nextLine().hashCode();
+        System.out.print("Nova resposta secreta (em branco = manter): ");
+        String respTxt = console.nextLine();
+        int respostaSecreta = respTxt.isEmpty() ? usuarioLogado.getHashRespostaSecreta() : respTxt.hashCode();
 
         Usuario usuarioEditado = new Usuario(nome, email, senha, perguntaSecreta, respostaSecreta);
         usuarioEditado.setID(usuarioLogado.getID());
@@ -151,63 +233,74 @@ public class VisaoUsuario {
         try {
             boolean sucesso = controle.atualizarUsuario(usuarioEditado);
             if (sucesso) {
-                System.out.println("Usuario atualizado com sucesso!");
+                System.out.println("\nDados atualizados.");
                 this.usuarioLogado = usuarioEditado;
             } else {
-                System.out.println("Erro: O novo email escolhido ja esta em uso por outro usuario.");
+                System.out.println("\nErro: O novo email ja esta em uso por outro usuario.");
             }
         } catch (Exception e) {
-            System.out.println("Ocorreu um erro no sistema: " + e.getMessage());
+            System.out.println("\nErro no sistema: " + e.getMessage());
         }
     }
 
     public void telaRecuperacaoSenha() {
-        System.out.print("Digite o seu email: ");
+        System.out.println("\nG12 TP1 1.2");
+        System.out.println("--------------");
+        System.out.println("> Inicio > Recuperar Senha\n");
+
+        System.out.print("Email: ");
         String email = console.nextLine();
-        
+
         try {
             String pergunta = controle.obterPerguntaSecreta(email);
             if (pergunta == null) {
-                System.out.println("Erro: Email nao encontrado.");
+                System.out.println("\nEmail nao encontrado.");
                 return;
             }
 
-            System.out.println("Sua pergunta secreta e: " + pergunta);
-            System.out.print("Digite a resposta: ");
+            System.out.println("\nSua pergunta secreta: " + pergunta);
+            System.out.print("Resposta: ");
             int resposta = console.nextLine().hashCode();
 
-            System.out.print("Digite a nova senha: ");
+            System.out.print("Nova senha: ");
             int novaSenha = console.nextLine().hashCode();
-            
+
             boolean sucesso = controle.recuperarSenha(email, resposta, novaSenha);
             if (sucesso) {
-                System.out.println("Senha alterada com sucesso! Voce ja pode fazer login.");
+                System.out.println("\nSenha alterada com sucesso!");
             } else {
-                System.out.println("Erro: Resposta secreta incorreta.");
+                System.out.println("\nResposta secreta incorreta.");
             }
         } catch (Exception e) {
-            System.out.println("Ocorreu um erro: " + e.getMessage());
+            System.out.println("\nErro: " + e.getMessage());
         }
     }
 
-    public void telaExclusao() {
-        System.out.print("Tem certeza que deseja excluir sua conta? (S/N): ");
+    /**
+     * Exclusão de conta. Retorna true se a conta foi de fato excluída
+     * (para que o menu force logout).
+     */
+    private boolean telaExclusao() {
+        System.out.print("\nTem certeza que deseja excluir sua conta? (S/N): ");
         String confirmacao = console.nextLine();
 
-        if (confirmacao.equalsIgnoreCase("S")) {
-            try {
-                boolean sucesso = controle.excluirUsuario(this.usuarioLogado.getID());
-                if (sucesso) {
-                    System.out.println("Conta excluida com sucesso!");
-                    this.usuarioLogado = null;
-                } else {
-                    System.out.println("Erro: Voce possui cursos ativos e nao pode excluir a conta.");
-                }
-            } catch (Exception e) {
-                System.out.println("Ocorreu um erro no sistema: " + e.getMessage());
-            }
-        } else {
+        if (!confirmacao.equalsIgnoreCase("S")) {
             System.out.println("Exclusao cancelada.");
+            return false;
+        }
+
+        try {
+            boolean sucesso = controle.excluirUsuario(this.usuarioLogado.getID());
+            if (sucesso) {
+                System.out.println("\nConta excluida.");
+                return true;
+            } else {
+                System.out.println("\nVoce possui cursos ativos (estado 0 ou 1). Cancele-os ou conclua-os antes de excluir a conta.");
+                return false;
+            }
+        } catch (Exception e) {
+            System.out.println("\nErro no sistema: " + e.getMessage());
+            return false;
         }
     }
 }
