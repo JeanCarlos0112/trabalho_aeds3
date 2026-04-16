@@ -4,6 +4,8 @@
 
 ```
 projeto/
+├── Videos/
+│   └── VideoTP1_G12.mp4                       ← Vídeo de demonstração
 ├── src/
 │   ├── aed3/                                  ← Pacote do professor (não alterar)
 │   │   ├── Arquivo.java                       ← CRUD genérico

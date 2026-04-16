@@ -54,12 +54,3 @@
 
 - Código não testado por falta de acesso ao computador (viagem Semana Santa).
 - O ArquivoUsuario dependia do ParEmailId para funcionar completamente.
-
-### Pendências
-
-### TODOS — Integração final
-
- - [ ] Criar Principal.java com tela de acesso (login / novo usuário) e menu principal (Meus dados / Meus cursos / Minhas inscrições).
- - [ ] Definir e alinhar a estrutura de diretórios final do projeto (ver [GUIA_ESTRUTURA.md](https://github.com/JeanCarlos0112/trabalho_aeds3/blob/main/GUIA_ESTRUTURA.md)).
- - [ ] Gravar vídeo de demonstração (até 3 minutos).
- - [ ] Preencher checklist do relatório no README.md.
