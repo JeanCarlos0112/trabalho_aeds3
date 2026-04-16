@@ -17,12 +17,12 @@ A classe de entrada é Principal, que abre os arquivos, instancia os controles/v
 - Visão (interface textual): VisaoUsuario e VisaoCurso.
 
 ### Entidades
-- Usuario — id, nome, email, hashSenha, perguntaSecreta e hashRespostaSecreta. A senha nunca é armazenada em claro; o mesmo vale para a resposta secreta, usada na recuperação de senha.
-- Curso — id, idUsuario (chave estrangeira), nome, descrição, data de início, código compartilhável NanoID (10 caracteres alfanuméricos gerado automaticamente) e estado (0: ativo recebendo inscrições, 1: ativo com inscrições encerradas, 2: concluído, 3: cancelado).
+- Usuario: id, nome, email, hashSenha, perguntaSecreta e hashRespostaSecreta. A senha nunca é armazenada em claro; o mesmo vale para a resposta secreta, usada na recuperação de senha.
+- Curso: id, idUsuario (chave estrangeira), nome, descrição, data de início, código compartilhável NanoID (10 caracteres alfanuméricos gerado automaticamente) e estado (0: ativo recebendo inscrições, 1: ativo com inscrições encerradas, 2: concluído, 3: cancelado).
 
 ### Índices implementados
-- ArquivoUsuario — Hash Extensível indiceEmail (ParEmailId) para localização do usuário por email durante o login. Mantido sincronizado em create, update e delete.
-- ArquivoCurso — duas Árvores B+:
+- ArquivoUsuario: Hash Extensível indiceEmail (ParEmailId) para localização do usuário por email durante o login. Mantido sincronizado em create, update e delete.
+- ArquivoCurso: duas Árvores B+:
 - indiceUsuarioCurso (ParIdId(idUsuario, idCurso)): registra o relacionamento 1:N entre usuário e cursos; uma busca com ParIdId(idUsuario, -1) retorna todos os cursos daquele usuário, graças ao compareTo tratando -1 como coringa.
 - indiceNomeCurso (ParNomeId(nome, idCurso)): índice indireto por nome, usado para listar os cursos do usuário logado em ordem alfabética no menu.
 
@@ -45,11 +45,16 @@ A classe de entrada é Principal, que abre os arquivos, instancia os controles/v
 
 ## Checklist Relatorio
 
-- [x] Há um CRUD de usuários (que estende a classe ArquivoIndexado, acrescentando Tabelas Hash Extensíveis e Árvores B+ como índices diretos e indiretos conforme necessidade) que funciona corretamente? Sim
-- [x] Há um CRUD de cursos (que estende a classe ArquivoIndexado, acrescentando Tabelas Hash Extensíveis e Árvores B+ como índices diretos e indiretos conforme necessidade) que funciona corretamente? Sim
-- [x] Os cursos estão vinculados aos usuários usando o idUsuario como chave estrangeira? Sim
-- [x] Há uma árvore B+ que registre o relacionamento 1:N entre usuários e cursos? Sim
-- [x] Há um CRUD de usuários (que estende a classe ArquivoIndexado, acrescentando Tabelas Hash Extensíveis e Árvores B+ como índices diretos e indiretos conforme necessidade)? Sim
-- [x] O trabalho compila corretamente? Sim
-- [x] O trabalho está completo e funcionando sem erros de execução? Sim
-- [x] O trabalho é original e não a cópia de um trabalho de outro grupo? Sim, o trabalho é de autoria total dos membros do grupo
+- [x] Há um CRUD de usuários (que estende a classe ArquivoIndexado, acrescentando Tabelas Hash Extensíveis e Árvores B+ como índices diretos e indiretos conforme necessidade) que funciona corretamente? Sim.
+- [x] Há um CRUD de cursos (que estende a classe ArquivoIndexado, acrescentando Tabelas Hash Extensíveis e Árvores B+ como índices diretos e indiretos conforme necessidade) que funciona corretamente? Sim.
+- [x] Os cursos estão vinculados aos usuários usando o idUsuario como chave estrangeira? Sim.
+- [x] Há uma árvore B+ que registre o relacionamento 1:N entre usuários e cursos? Sim.
+- [x] Há um CRUD de usuários (que estende a classe ArquivoIndexado, acrescentando Tabelas Hash Extensíveis e Árvores B+ como índices diretos e indiretos conforme necessidade)? Sim.
+- [x] O trabalho compila corretamente? Sim.
+- [x] O trabalho está completo e funcionando sem erros de execução? Sim.
+- [x] O trabalho é original e não a cópia de um trabalho de outro grupo? Sim.
+
+## ADICIONAIS
+Como membros deste grupo decidimos em colocar como o nosso grupo foi organizado aqui no **Github** e como mantemos a consistencia através de diversas implementações, tudo estará no arquivo `readme2.md` abaixo:
+
+
