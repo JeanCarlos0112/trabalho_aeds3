@@ -1,53 +1,55 @@
 # TRABALHO PRÁTICO AEDs III - GRUPO 12
 
 ## PARTICIPANTES
-- Jean
-- Miro
-- Luiz
-- André
+- Jean Carlos Lopes Lellis
+- Miro Brito de Area Leao
+- Luiz Fernando Santos Langa
+- André Luiz Baptista Esteves Bassini 
 
-## PROPOSTA
-A proposta é basicamente as informações previas que o professor responsavel pela disciplina atual (Kutova) passou para gente estruturado em um markdown aqui no repositorio do github para facilitar o acesso a essas informações, se precisar, vai estar tudo nesse arquivo a seguir:
+## DESCRIÇÃO DO SISTEMA
+O **G12 TP1 1.2** é um sistema textual em Java para gestão de cursos livres entre alunos da PUC Minas. Cada usuário cadastrado pode ofertar seus próprios cursos, que ficarão disponíveis para que outros usuários se inscrevam (funcionalidade de inscrição reservada para o TP2). O acesso é feito por email e senha, e toda a persistência é baseada em arquivos binários, com o CRUD genérico Arquivo do pacote aed3 como base, estendido por índices em Hash Extensível e Árvore B+.
 
-[Proposta de trabalho do professor](https://github.com/JeanCarlos0112/trabalho_aeds3/blob/main/PROPOSTA.md)
+### Arquitetura (MVC)
+A classe de entrada é Principal, que abre os arquivos, instancia os controles/visões e centraliza o fechamento seguro dos arquivos ao sair. O projeto segue o padrão MVC separando dados, lógica e apresentação:
 
-## CHANGELOG:
-As mudanças detalhadas e a checklist estará no arquivo ao final dessa seção, irei colocar um resumo do changelog para poder ficar de mais facil visualização o que cada participante fez de forma resumida:
+- Modelo (dados): Usuario, Curso, ArquivoUsuario, ArquivoCurso, ParEmailId, além das classes do pacote aed3 (Arquivo, HashExtensivel, ArvoreBMais, ParIdId, ParNomeId).
+- Controle (lógica): ControleUsuario e ControleCurso.
+- Visão (interface textual): VisaoUsuario e VisaoCurso.
 
-**15/04 — ANDRÉ**: Criou a Visão e o Controle de cursos, implementando a listagem ordenada alfabeticamente, o sistema de geração automática de códigos NanoID e a lógica de persistência vinculada ao ID do usuário logado.
+### Entidades
+- Usuario — id, nome, email, hashSenha, perguntaSecreta e hashRespostaSecreta. A senha nunca é armazenada em claro; o mesmo vale para a resposta secreta, usada na recuperação de senha.
+- Curso — id, idUsuario (chave estrangeira), nome, descrição, data de início, código compartilhável NanoID (10 caracteres alfanuméricos gerado automaticamente) e estado (0: ativo recebendo inscrições, 1: ativo com inscrições encerradas, 2: concluído, 3: cancelado).
 
-**15/04 — LUIZ**: Criou a Visão e o Controle de usuários, implementando os menus de sessão (Logado/Deslogado), o sistema de recuperação de senha por pergunta secreta e a lógica de exclusão de conta com validação de cursos ativos.
+### Índices implementados
+- ArquivoUsuario — Hash Extensível indiceEmail (ParEmailId) para localização do usuário por email durante o login. Mantido sincronizado em create, update e delete.
+- ArquivoCurso — duas Árvores B+:
+- indiceUsuarioCurso (ParIdId(idUsuario, idCurso)): registra o relacionamento 1:N entre usuário e cursos; uma busca com ParIdId(idUsuario, -1) retorna todos os cursos daquele usuário, graças ao compareTo tratando -1 como coringa.
+- indiceNomeCurso (ParNomeId(nome, idCurso)): índice indireto por nome, usado para listar os cursos do usuário logado em ordem alfabética no menu.
 
-**02/04 — JEAN**: Criou ParEmailId, ArquivoCurso com B+, teste, guia e ajustou ArquivoUsuario.
+### Fluxo de uso
+1. Tela de acesso (deslogado): Login / Novo usuário / Recuperar senha / Sair.
+2. Menu principal (logado): Meus dados / Meus cursos / Minhas inscrições (placeholder do TP2) / Sair.
+3. Meus dados: visualização, edição e exclusão da conta do usuário logado.
+4. Meus cursos: lista numerada em ordem alfabética (obtida via índice B+ de nome); digitar o número abre a tela de detalhe do curso com opções para editar, encerrar inscrições, concluir ou cancelar/excluir.
+5. Novo curso: o idUsuario é preenchido automaticamente com o do usuário ativo e o código NanoID é gerado pelo sistema. 
 
-**01/04 — MIRO**: Criou as entidades, criou CRUD base (Usuario e Curso) e organizou pacote aed3 (Codigos que o professor forneceu para usar como base no desenvolvimento).
-
-[Arquivo de changelog detalhado](https://github.com/JeanCarlos0112/trabalho_aeds3/blob/main/CHANGELOG.md)
-
-## GUIA PARA A ESTRUTURA DE DIRETORIOS ATUAL
-O arquivo contempla uma especie de guia para a estrutura de pastas que o **MIRO** criou e o **JEAN** organizou para ficar mais facil de visualizar o projeto e fazer implementações futuras e/ou ajustes adicionais, além disso no guia também tem cada alteração de forma detalhada de como cada participante fez cada coisa:
-
-[Guia para a estrutura de pastas do projeto](https://github.com/JeanCarlos0112/trabalho_aeds3/blob/main/GUIA_ESTRUTURA.md)
-
-## To-Do List:
-
-- [x] Implementar o CRUD de Usuários. (Responsabilidade: **MIRO**)
-- [x] Implementar o CRUD de Cursos, assegurando que cada curso pertença a um usuário específico. (Responsabilidade: **MIRO**)
-- [x] Implementar o relacionamento 1:N com o par (idUsuario; idCurso) usando a Árvore B+. (Responsabilidade: **JEAN**)
-- [x] Criar a visão e o controle de usuários. Assegurar que um usuário não possa ser excluído se algum curso ativo estiver vinculada a ele. Se não, os cursos inativos devem ser removidos também. (Responsabilidade: **LUIZ**)
-- [x] Criar a visão e o controle de cursos. Um novo curso deverá ser automaticamente vinculado ao usuário ativo no sistema. (Responsabilidade: **ANDRÉ**)
-- [x] Criar Principal.java com tela de acesso (login / novo usuário) e menu principal (Meus dados / Meus cursos / Minhas inscrições).
-- [x] Definir e alinhar a estrutura de diretórios final do projeto (ver [GUIA_ESTRUTURA.md](https://github.com/JeanCarlos0112/trabalho_aeds3/blob/main/GUIA_ESTRUTURA.md)).
-- [x] Gravar vídeo de demonstração (até 3 minutos).
-- [x] Preencher checklist do relatório no README.md.
+### Operações especiais
+- Recuperação de senha por pergunta secreta: o usuário informa email e a resposta; se o hash bater com o armazenado, pode definir uma nova senha (ControleUsuario.recuperarSenha).
+- Exclusão de conta com validação de cursos ativos: um usuário só pode ser excluído se não tiver nenhum curso em estado 0 ou 1; cursos em estado 2 ou 3 são removidos em cascata junto com a conta (ControleUsuario.excluirUsuario).
+- Listagem alfabética por usuário: ArquivoCurso.readAllOrdenadoPorNome(idUsuario) combina o índice 1:N com o índice de nomes para montar o menu conforme a especificação.
+- Geração automática de NanoID: ControleCurso.cadastrarCurso gera o código compartilhável de 10 caracteres no padrão NanoID.
+- Gestão de estado do curso: as opções C, D e E da tela de detalhe alteram o estado (encerrar inscrições, concluir, cancelar). O cancelamento equivale à exclusão quando não há inscritos (requisito já preparado para o TP2).
+- Unicidade de email: verificada no cadastro e na edição de dados do usuário via ArquivoUsuario.readEmail.
+- Manutenção sincronizada dos índices: todos os create/update/delete de ArquivoUsuario e ArquivoCurso atualizam os índices correspondentes, garantindo consistência mesmo quando o email do usuário ou o nome/dono do curso mudam.
+- Fechamento seguro dos arquivos: Principal fecha ArquivoUsuario, ArquivoCurso e o Scanner em um bloco finally, evitando escritas pendentes truncadas.
 
 ## Checklist Relatorio
 
-- [x] Há um CRUD de usuários (que estende a classe ArquivoIndexado, acrescentando Tabelas Hash Extensíveis e Árvores B+ como índices diretos e indiretos conforme necessidade) que funciona corretamente?
-- [x] Há um CRUD de cursos (que estende a classe ArquivoIndexado, acrescentando Tabelas Hash Extensíveis e Árvores B+ como índices diretos e indiretos conforme necessidade) que funciona corretamente?
-- [x] Os cursos estão vinculados aos usuários usando o idUsuario como chave estrangeira?
-- [x] Há uma árvore B+ que registre o relacionamento 1:N entre usuários e cursos?
-- [x] Há um CRUD de usuários (que estende a classe ArquivoIndexado, acrescentando Tabelas Hash Extensíveis e Árvores B+ como índices diretos e indiretos conforme necessidade)?
-- [x] O trabalho compila corretamente?
-- [x] O trabalho está completo e funcionando sem erros de execução?
-- [x] O trabalho é original e não a cópia de um trabalho de outro grupo?
+- [x] Há um CRUD de usuários (que estende a classe ArquivoIndexado, acrescentando Tabelas Hash Extensíveis e Árvores B+ como índices diretos e indiretos conforme necessidade) que funciona corretamente? Sim
+- [x] Há um CRUD de cursos (que estende a classe ArquivoIndexado, acrescentando Tabelas Hash Extensíveis e Árvores B+ como índices diretos e indiretos conforme necessidade) que funciona corretamente? Sim
+- [x] Os cursos estão vinculados aos usuários usando o idUsuario como chave estrangeira? Sim
+- [x] Há uma árvore B+ que registre o relacionamento 1:N entre usuários e cursos? Sim
+- [x] Há um CRUD de usuários (que estende a classe ArquivoIndexado, acrescentando Tabelas Hash Extensíveis e Árvores B+ como índices diretos e indiretos conforme necessidade)? Sim
+- [x] O trabalho compila corretamente? Sim
+- [x] O trabalho está completo e funcionando sem erros de execução? Sim
+- [x] O trabalho é original e não a cópia de um trabalho de outro grupo? Sim, o trabalho é de autoria total dos membros do grupo
