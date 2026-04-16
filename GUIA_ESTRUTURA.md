@@ -73,7 +73,7 @@ Métodos novos disponíveis para o André e o Luiz usarem:
 | `verificaUsuarioTemCursos(int id)` | Retorna true/false se o usuário tem cursos cadastrados  | Luiz         |
 
 Os overrides de `create`, `delete` e `update` mantêm os índices sincronizados
-automaticamente — o André e o Luiz não precisam se preocupar com isso.
+automaticamente.
 
 ### 3. `ArquivoUsuario.java` → `entidades/usuarios/`
 
