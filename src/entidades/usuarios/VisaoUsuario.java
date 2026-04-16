@@ -44,8 +44,9 @@ public class VisaoUsuario {
                 System.out.println("║ Meus Dados (" + usuarioLogado.getNome() + ") ║");
                 System.out.println("╚════════════════════════════════╝");
                 System.out.println("Opcoes:");
-                System.out.println("1 - Atualizar Meus Dados");
-                System.out.println("2 - Excluir Minha Conta");
+                System.out.println("1 - Cursos");
+                System.out.println("2 - Atualizar Meus Dados");
+                System.out.println("3 - Excluir Minha Conta");
                 System.out.println("0 - Logout (Sair da conta)");
                 System.out.print("Escolha: ");
 
