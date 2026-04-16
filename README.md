@@ -37,11 +37,11 @@ O arquivo contempla uma especie de guia para a estrutura de pastas que **MIRO** 
 
 ## Checklist Relatorio
 
-- [ ] Há um CRUD de usuários (que estende a classe ArquivoIndexado, acrescentando Tabelas Hash Extensíveis e Árvores B+ como índices diretos e indiretos conforme necessidade) que funciona corretamente?
-- [ ] Há um CRUD de cursos (que estende a classe ArquivoIndexado, acrescentando Tabelas Hash Extensíveis e Árvores B+ como índices diretos e indiretos conforme necessidade) que funciona corretamente?
-- [ ] Os cursos estão vinculados aos usuários usando o idUsuario como chave estrangeira?
-- [ ] Há uma árvore B+ que registre o relacionamento 1:N entre usuários e cursos?
-- [ ] Há um CRUD de usuários (que estende a classe ArquivoIndexado, acrescentando Tabelas Hash Extensíveis e Árvores B+ como índices diretos e indiretos conforme necessidade)?
-- [ ] O trabalho compila corretamente?
-- [ ] O trabalho está completo e funcionando sem erros de execução?
-- [ ] O trabalho é original e não a cópia de um trabalho de outro grupo?
+- [x] Há um CRUD de usuários (que estende a classe ArquivoIndexado, acrescentando Tabelas Hash Extensíveis e Árvores B+ como índices diretos e indiretos conforme necessidade) que funciona corretamente?
+- [x] Há um CRUD de cursos (que estende a classe ArquivoIndexado, acrescentando Tabelas Hash Extensíveis e Árvores B+ como índices diretos e indiretos conforme necessidade) que funciona corretamente?
+- [x] Os cursos estão vinculados aos usuários usando o idUsuario como chave estrangeira?
+- [x] Há uma árvore B+ que registre o relacionamento 1:N entre usuários e cursos?
+- [x] Há um CRUD de usuários (que estende a classe ArquivoIndexado, acrescentando Tabelas Hash Extensíveis e Árvores B+ como índices diretos e indiretos conforme necessidade)?
+- [x] O trabalho compila corretamente?
+- [x] O trabalho está completo e funcionando sem erros de execução?
+- [x] O trabalho é original e não a cópia de um trabalho de outro grupo?
