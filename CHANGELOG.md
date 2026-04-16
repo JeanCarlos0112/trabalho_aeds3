@@ -1,3 +1,20 @@
+### [2026-04-15] — LUIZ — Visão e Controle de Usuários
+#### Arquivos criados:
+
+- entidades/usuarios/ControleUsuario.java — Controlador de usuários com validação de email único (cadastro/atualização), autenticação (login), recuperação de senha, e lógica restrita de exclusão (bloqueia se o usuário tiver cursos ativos e remove cursos inativos em cascata). 
+- entidades/usuarios/VisaoUsuario.java — Interface de linha de comando que gerencia a interação com o usuário. Contém o controle de sessão e os métodos de entrada/saída para as telas de cadastro, login, atualização, exclusão de conta e recuperação de senha. 
+
+#### Arquivos modificados:
+- entidades/usuarios/Usuario.java — Adicionado a função setHashSenha, para permitir a alteração da senha do usuário. 
+
+### [2026-04-15] — ANDRÉ — Visão e Controle de Cursos
+#### Arquivos criados:
+- entidades/cursos/ControleCurso.java — Controlador de cursos através da geração automática do NanoID de 10 caracteres no cadastro, vinculação do curso ao usuário logado e execução das operações de busca e exclusão através do arquivo de dados.
+- entidades/cursos/VisaoCurso.java — Interface de linha de comando que gerencia a interação relacionada aos cursos. Contém o menu de opções para o estudante e os métodos de entrada/saída para as telas de cadastro, exclusão, atualização de status e a listagem ordenada (alfabética) dos cursos vinculados ao usuário.
+
+#### Arquivos modificados:
+- entidades/cursos/Curso.java — Atualizado para incluir os métodos de acesso (getters/setters) necessários para a manipulação de metadados, como a descrição, o estado do curso e o código NanoID.
+
 ### [2026-04-02] — JEAN — Relacionamento 1:N e índices
 #### Arquivos criados:
 
@@ -37,23 +54,6 @@
 
 - Código não testado por falta de acesso ao computador (viagem Semana Santa).
 - O ArquivoUsuario dependia do ParEmailId para funcionar completamente.
-
-### [2026-04-15] — LUIZ — Visão e Controle de Usuários
-#### Arquivos criados:
-
-- entidades/usuarios/ControleUsuario.java — Controlador de usuários com validação de email único (cadastro/atualização), autenticação (login), recuperação de senha, e lógica restrita de exclusão (bloqueia se o usuário tiver cursos ativos e remove cursos inativos em cascata). 
-- entidades/usuarios/VisaoUsuario.java — Interface de linha de comando que gerencia a interação com o usuário. Contém o controle de sessão e os métodos de entrada/saída para as telas de cadastro, login, atualização, exclusão de conta e recuperação de senha. 
-
-#### Arquivos modificados:
-- entidades/usuarios/Usuario.java — Adicionado a função setHashSenha, para permitir a alteração da senha do usuário. 
-
-### [2026-04-15] — ANDRÉ — Visão e Controle de Cursos
-#### Arquivos criados:
-- entidades/cursos/ControleCurso.java — Controlador de cursos através da geração automática do NanoID de 10 caracteres no cadastro, vinculação do curso ao usuário logado e execução das operações de busca e exclusão através do arquivo de dados.
-- entidades/cursos/VisaoCurso.java — Interface de linha de comando que gerencia a interação relacionada aos cursos. Contém o menu de opções para o estudante e os métodos de entrada/saída para as telas de cadastro, exclusão, atualização de status e a listagem ordenada (alfabética) dos cursos vinculados ao usuário.
-
-#### Arquivos modificados:
-- entidades/cursos/Curso.java — Atualizado para incluir os métodos de acesso (getters/setters) necessários para a manipulação de metadados, como a descrição, o estado do curso e o código NanoID.
 
 ### Pendências
 
