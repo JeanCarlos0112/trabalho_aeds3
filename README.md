@@ -8,13 +8,13 @@ A proposta é basicamente as informações previas que o professor passou pra ge
 ## CHANGELOG (O QUE FOI FEITO):
 As mudanças detalhadas e a checklist estará no arquivo ao final dessa seção, vou colocar um resumo do changelog só pra poder ficar de mais facil administração:
 
-**02/04 — JEAN**: Criou ParEmailId, ArquivoCurso com B+, teste, guia e ajustou ArquivoUsuario.
-
-**01/04 — MIRO**: Criou as entidades, criou CRUD base (Usuario e Curso) e organizou pacote aed3 (Codigos que o professor forneceu para usar como base no desenvolvimento).
-
 **15/04 — LUIZ**: Criou a Visão e o Controle de usuários, implementando os menus de sessão (Logado/Deslogado), o sistema de recuperação de senha por pergunta secreta e a lógica de exclusão de conta com validação de cursos ativos.
 
 **15/04 — ANDRÉ**: Criou a Visão e o Controle de cursos, implementando a listagem ordenada alfabeticamente, o sistema de geração automática de códigos NanoID e a lógica de persistência vinculada ao ID do usuário logado.
+
+**02/04 — JEAN**: Criou ParEmailId, ArquivoCurso com B+, teste, guia e ajustou ArquivoUsuario.
+
+**01/04 — MIRO**: Criou as entidades, criou CRUD base (Usuario e Curso) e organizou pacote aed3 (Codigos que o professor forneceu para usar como base no desenvolvimento).
 
 [Arquivo de changelog detalhado](https://github.com/JeanCarlos0112/trabalho_aeds3/blob/main/CHANGELOG.md)
 
