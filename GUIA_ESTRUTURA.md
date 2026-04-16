@@ -129,7 +129,7 @@ Sistema de menus dinâmico que gerencia o estado da sessão (usuário logado e d
 | `excluirUsuario ` | Executa a limpeza em cascata (remove cursos inativos) após validação.  |
 | `obterPerguntaSecreta ` | Busca apenas a string da pergunta antes da validação da resposta.   |
 
-##Como funciona a Exclusão Segura na prática 
+## Como funciona a Exclusão Segura na prática 
 
 ```java
 public boolean excluirUsuario(int idUsuario) throws Exception {
