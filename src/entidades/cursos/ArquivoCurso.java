@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import aed3.*;
 
 /**
- * CRUD de Cursos estendendo Arquivo genérico.
  * 
  * Índices adicionais (Árvore B+):
  * 
@@ -27,7 +26,7 @@ public class ArquivoCurso extends Arquivo<Curso> {
 
         indiceUsuarioCurso = new ArvoreBMais<>(
             ParIdId.class.getConstructor(),
-            5,  // ordem da árvore
+            5,
             "./dados/cursos/indiceUsuarioCurso.btree.db"
         );
 
