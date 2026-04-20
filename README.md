@@ -52,7 +52,7 @@ A classe de entrada é Principal, que abre os arquivos, instancia os controles/v
 - [x] Há um CRUD de usuários (que estende a classe ArquivoIndexado, acrescentando Tabelas Hash Extensíveis e Árvores B+ como índices diretos e indiretos conforme necessidade)? Sim.
 - [x] O trabalho compila corretamente? Sim.
 - [x] O trabalho está completo e funcionando sem erros de execução? Sim.
-- [x] O trabalho é original e não a cópia de um trabalho de outro grupo? Sim.
+- [x] O trabalho é original e não a cópia de um trabalho de outro grupo? Sim, o trabalho é de total autoria dos respectivos membros do grupo.
 
 ## ADICIONAIS
 Como membros deste grupo decidimos em colocar como o nosso grupo foi organizado aqui no **Github** e como mantemos a consistencia através de diversas implementações, tudo estará no arquivo `README2.md` abaixo:
