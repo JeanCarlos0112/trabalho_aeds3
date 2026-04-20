@@ -40,10 +40,10 @@ public class VisaoUsuario {
     public void menuUsuario() {
         while (true) {
             if (usuarioLogado == null) {
-                if (!menuDeslogado()) return; // usuário escolheu sair
+                if (!menuDeslogado()) return;
             } else {
                 if (!menuLogado()) {
-                    this.usuarioLogado = null;  // logout
+                    this.usuarioLogado = null;
                 }
             }
         }
@@ -133,7 +133,7 @@ public class VisaoUsuario {
                     telaAtualizacao();
                     break;
                 case "B":
-                    if (telaExclusao()) return false;  // conta excluída
+                    if (telaExclusao()) return false;
                     break;
                 case "R":
                     return true;

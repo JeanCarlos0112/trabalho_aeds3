@@ -62,10 +62,9 @@ public class ControleUsuario {
     public boolean excluirUsuario(int idUsuario) throws Exception {
         ArrayList<Curso> cursosDoUsuario = arqCurso.readAll(idUsuario);
 
-        // Verifica se existe algum curso ATIVO (estado 0 ou 1)
         for (Curso c : cursosDoUsuario) {
             if (c.getEstado() == 0 || c.getEstado() == 1) {
-                return false; // Tem curso ativo, bloqueia exclusão
+                return false;
             }
         }
 
@@ -73,7 +72,6 @@ public class ControleUsuario {
             arqCurso.delete(c.getID());
         }
 
-        // Remove o usuário
         return arqUsuario.delete(idUsuario);
     }
 }

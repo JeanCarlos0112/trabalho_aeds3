@@ -47,10 +47,8 @@ public class ArquivoCurso extends Arquivo<Curso> {
     public int create(Curso curso) throws Exception {
         int id = super.create(curso);
 
-        // Índice 1:N  (idUsuario, idCurso)
         indiceUsuarioCurso.create(new ParIdId(curso.getIdUsuario(), id));
 
-        // Índice por nome
         String nomeTruncado = truncaNome(curso.getNome());
         indiceNomeCurso.create(new ParNomeId(nomeTruncado, id));
 
@@ -78,9 +76,6 @@ public class ArquivoCurso extends Arquivo<Curso> {
         return removido;
     }
 
-    // ---------------------------------------------------------------
-    //  UPDATE — atualiza curso e corrige os índices se necessário
-    // ---------------------------------------------------------------
     /**
      * Atualiza curso e corrige os índices se necessário
      * @param curso - objeto curso atualizado
@@ -94,7 +89,6 @@ public class ArquivoCurso extends Arquivo<Curso> {
 
         boolean atualizado = super.update(novoCurso);
         if (atualizado) {
-            // Se o nome mudou, atualiza índice de nomes
             if (!cursoAntigo.getNome().equals(novoCurso.getNome())) {
                 indiceNomeCurso.delete(
                     new ParNomeId(truncaNome(cursoAntigo.getNome()), novoCurso.getID()));
@@ -102,7 +96,6 @@ public class ArquivoCurso extends Arquivo<Curso> {
                     new ParNomeId(truncaNome(novoCurso.getNome()), novoCurso.getID()));
             }
 
-            // Se o dono mudou, atualiza índice 1:N
             if (cursoAntigo.getIdUsuario() != novoCurso.getIdUsuario()) {
                 indiceUsuarioCurso.delete(
                     new ParIdId(cursoAntigo.getIdUsuario(), novoCurso.getID()));

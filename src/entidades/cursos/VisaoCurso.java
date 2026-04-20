@@ -143,7 +143,6 @@ public class VisaoCurso {
             System.out.println("ESTADO........: " + c.getEstadoTexto());
 
             System.out.println();
-            // Mensagem contextual por estado
             switch (c.getEstado()) {
                 case 0: System.out.println("Este curso esta aberto para inscricoes!"); break;
                 case 1: System.out.println("Este curso ja nao aceita novas inscricoes."); break;

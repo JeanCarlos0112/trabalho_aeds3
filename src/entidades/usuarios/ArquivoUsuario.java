@@ -78,7 +78,6 @@ public class ArquivoUsuario extends Arquivo<Usuario> {
 
         boolean atualizado = super.update(novoUsuario);
         if (atualizado && !antigo.getEmail().equals(novoUsuario.getEmail())) {
-            // Email mudou — atualiza o índice
             indiceEmail.delete(Math.abs(antigo.getEmail().hashCode()));
             indiceEmail.create(new ParEmailId(novoUsuario.getEmail(), novoUsuario.getID()));
         }
