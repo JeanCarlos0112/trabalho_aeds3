@@ -18,7 +18,7 @@ import entidades.cursos.VisaoCurso;
  *   Tela principal (logado):
  *     (A) Meus dados
  *     (B) Meus cursos
- *     (C) Minhas inscricoes   [placeholder TP2]
+ *     (C) Minhas inscricoes
  *     (S) Sair (logout)
  */
 public class VisaoUsuario {
@@ -34,9 +34,9 @@ public class VisaoUsuario {
         this.usuarioLogado = null;
     }
 
-    // =================================================================
-    //  LOOP PRINCIPAL DO MENU
-    // =================================================================
+    /**
+     * Menu do usuario
+    */
     public void menuUsuario() {
         while (true) {
             if (usuarioLogado == null) {
@@ -49,10 +49,10 @@ public class VisaoUsuario {
         }
     }
 
-    // =================================================================
-    //  MENU INICIAL (deslogado)
-    //  Retorna false quando o usuário escolhe "Sair".
-    // =================================================================
+    /**
+     * Menu Principal Usuario (Deslogado)
+     * @return retorna false quando o usuário escolhe "Sair".
+     */
     private boolean menuDeslogado() {
         System.out.println("\nG12 TP1 1.2");
         System.out.println("--------------\n");
@@ -76,10 +76,10 @@ public class VisaoUsuario {
         }
     }
 
-    // =================================================================
-    //  MENU PRINCIPAL (logado)
-    //  Retorna false quando o usuário faz logout ou exclui a conta.
-    // =================================================================
+    /**
+     * Menu Principal Usuario (logado)
+     * @return retorna false quando o usuário faz logout ou exclui a conta.
+     */
     private boolean menuLogado() {
         System.out.println("\nG12 TP1 1.2");
         System.out.println("--------------");
@@ -93,7 +93,7 @@ public class VisaoUsuario {
         String op = console.nextLine().trim().toUpperCase();
         switch (op) {
             case "A":
-                return telaMeusDados(); // retorna false se a conta foi excluída
+                return telaMeusDados();
             case "B":
                 visaoCurso.menuCurso(usuarioLogado.getID());
                 return true;
@@ -109,10 +109,10 @@ public class VisaoUsuario {
         }
     }
 
-    // =================================================================
-    //  TELA "MEUS DADOS" — exibe dados e oferece editar/excluir conta
-    //  Retorna false se a conta foi excluída (obriga logout).
-    // =================================================================
+    /**
+     * TELA "MEUS DADOS" - exibe dados e oferece editar/excluir conta
+     * @return retorna false se a conta foi excluída (obriga logout).
+     */
     private boolean telaMeusDados() {
         while (true) {
             System.out.println("\nG12 TP1 1.2");
@@ -143,9 +143,9 @@ public class VisaoUsuario {
         }
     }
 
-    // =================================================================
-    //  TELAS DE ENTRADA/SAÍDA
-    // =================================================================
+    /**
+     * TELAS DE ENTRADA/SAÍDA
+     */
     public void telaCadastro() {
         System.out.println("\nG12 TP1 1.2");
         System.out.println("--------------");
@@ -178,6 +178,9 @@ public class VisaoUsuario {
         }
     }
 
+    /**
+     * Tela LOGIN
+     */
     public void telaLogin() {
         System.out.println("\nG12 TP1 1.2");
         System.out.println("--------------");
@@ -201,6 +204,9 @@ public class VisaoUsuario {
         }
     }
 
+    /**
+     * Tela ATUALIZAÇÃO de dados
+     */
     public void telaAtualizacao() {
         System.out.println("\nG12 TP1 1.2");
         System.out.println("--------------");
@@ -243,6 +249,9 @@ public class VisaoUsuario {
         }
     }
 
+    /**
+     * Tela RECUPERAÇÃO DE CONTA
+     */
     public void telaRecuperacaoSenha() {
         System.out.println("\nG12 TP1 1.2");
         System.out.println("--------------");
@@ -277,8 +286,8 @@ public class VisaoUsuario {
     }
 
     /**
-     * Exclusão de conta. Retorna true se a conta foi de fato excluída
-     * (para que o menu force logout).
+     * Exclusão de conta
+     * @return  Retorna true se a conta foi de fato excluída (para que o menu force logout).
      */
     private boolean telaExclusao() {
         System.out.print("\nTem certeza que deseja excluir sua conta? (S/N): ");

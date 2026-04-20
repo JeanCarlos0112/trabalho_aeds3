@@ -3,10 +3,8 @@ package entidades.usuarios;
 import aed3.*;
 
 /**
- * CRUD de Usuários estendendo Arquivo genérico.
- * 
  * Índice adicional (Hash Extensível):
- *   indiceEmail — ParEmailId(email, id)
+ *   indiceEmail - ParEmailId(email, id)
  *   Permite buscar usuário pelo email (login).
  * 
  * NOTA: Os overrides de delete e update foram acrescentados
@@ -27,6 +25,11 @@ public class ArquivoUsuario extends Arquivo<Usuario> {
         );
     }
 
+    /**
+     * Cria usuario na base de dados do programa
+     * @param usuario - objeto usuario a ser criado no db
+     * @return retorna id do usuario no db
+     */
     @Override
     public int create(Usuario u) throws Exception {
         int id = super.create(u);
@@ -36,12 +39,19 @@ public class ArquivoUsuario extends Arquivo<Usuario> {
 
     /**
      * Busca usuário pelo email (para login).
+     * @param string - email do usuario
+     * @return retorna objeto usuario
      */
     public Usuario readEmail(String email) throws Exception {
         ParEmailId pei = indiceEmail.read(Math.abs(email.hashCode()));
         return (pei == null) ? null : read(pei.getId());
     }
 
+    /**
+     * Deleta usuario na base de dados do programa
+     * @param int - id do usuario a ser deletado
+     * @return retorna true para sucesso ou false para falha na deleção
+     */
     @Override
     public boolean delete(int id) throws Exception {
         Usuario u = read(id);
@@ -55,6 +65,11 @@ public class ArquivoUsuario extends Arquivo<Usuario> {
         return removido;
     }
 
+    /**
+     * Atualiza usuario na base de dados do programa
+     * @param usuario - objeto usuario atualizado
+     * @return retorna true para sucesso ou false para falha na deleção
+     */
     @Override
     public boolean update(Usuario novoUsuario) throws Exception {
         Usuario antigo = read(novoUsuario.getID());

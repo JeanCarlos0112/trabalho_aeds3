@@ -69,7 +69,6 @@ public class ControleUsuario {
             }
         }
 
-        // Remove todos os cursos inativos (estado 2 ou 3)
         for (Curso c : cursosDoUsuario) {
             arqCurso.delete(c.getID());
         }

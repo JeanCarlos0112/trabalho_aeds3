@@ -16,7 +16,7 @@ import java.util.Scanner;
  *       (B) Corrigir dados do curso
  *       (C) Encerrar inscrições  (estado 0 -> 1)
  *       (D) Concluir curso       (estado 0/1 -> 2)
- *       (E) Cancelar curso       (no TP1, sem inscrições, exclui)
+ *       (E) Cancelar curso
  *       (R) Retornar
  */
 public class VisaoCurso {
@@ -30,9 +30,11 @@ public class VisaoCurso {
         this.console = console;
     }
 
-    // =================================================================
-    //  MENU "MEUS CURSOS"
-    // =================================================================
+    /**
+     * Menu do Curso
+     * @param idUsuarioLogado - id do usuario usando o sistema no momento
+     * @return void
+     */
     public void menuCurso(int idUsuarioLogado) {
         while (true) {
             ArrayList<Curso> cursos;
@@ -71,7 +73,6 @@ public class VisaoCurso {
             } else if (opcao.equalsIgnoreCase("R")) {
                 return;
             } else {
-                // Tenta interpretar como número sequencial do curso
                 int num;
                 try {
                     num = Integer.parseInt(opcao);
@@ -88,9 +89,11 @@ public class VisaoCurso {
         }
     }
 
-    // =================================================================
-    //  TELA "NOVO CURSO"
-    // =================================================================
+    /**
+     * Menu do Novo Curso
+     * @param idUsuarioLogado - id do usuario usando o sistema no momento
+     * @return void
+     */
     public void telaNovoCurso(int idUsuarioLogado) {
         System.out.println("\nG12 TP1 1.2");
         System.out.println("--------------");
@@ -109,10 +112,12 @@ public class VisaoCurso {
             System.out.println("Erro ao cadastrar: " + e.getMessage());
         }
     }
-
-    // =================================================================
-    //  TELA DE DETALHE DO CURSO — opções A, B, C, D, E, R
-    // =================================================================
+   
+    /**
+     * Menu de detalhe do Curso
+     * @param idUsuarioLogado - id do usuario usando o sistema no momento
+     * @return void
+     */
     public void telaDetalheCurso(int idCurso) {
         while (true) {
             Curso c;
@@ -196,16 +201,9 @@ public class VisaoCurso {
                         System.out.print("Confirma o cancelamento do curso? (S/N): ");
                         String conf = console.nextLine().trim();
                         if (conf.equalsIgnoreCase("S")) {
-                            // PROPOSTA: "Só podemos excluir um curso se não houver nenhum aluno inscrito nele.
-                            // [...] Se não houver, o curso pode ser excluído, mas, se houver, o curso deve ser
-                            // registrado como cancelado."
-                            //
-                            // No TP1 não há inscrições implementadas: o conjunto de inscritos é sempre vazio,
-                            // portanto o curso pode ser EXCLUÍDO. Quando o TP2 adicionar inscrições, bastará
-                            // trocar a condição por "se houver inscritos -> setEstado(3)".
                             if (controle.excluirCurso(c.getID())) {
                                 System.out.println("\nCurso cancelado e removido do sistema (nenhum inscrito).");
-                                return; // volta ao menu de cursos
+                                return;
                             } else {
                                 System.out.println("Falha ao cancelar o curso.");
                             }
@@ -224,11 +222,11 @@ public class VisaoCurso {
         }
     }
 
-    // =================================================================
-    //  TELA "CORRIGIR DADOS DO CURSO"
-    //  Edita apenas nome, descrição e data. O estado é controlado
-    //  pelas opções C/D/E. Código (NanoID) e idUsuario são imutáveis.
-    // =================================================================
+    /**
+     * Menu de Correção do Curso
+     * @param idUsuarioLogado - id do usuario usando o sistema no momento
+     * @return void
+     */
     private void telaCorrecaoDados(Curso c) {
         System.out.println("\nG12 TP1 1.2");
         System.out.println("--------------");
