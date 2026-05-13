@@ -3,23 +3,11 @@ package entidades.cursos;
 import java.util.ArrayList;
 import aed3.*;
 
-/**
- * 
- * Índices adicionais (Árvore B+):
- * 
- *  1) indiceUsuarioCurso — ParIdId(idUsuario, idCurso)
- *      Registra o relacionamento 1:N entre usuários e cursos.
- *      Busca com ParIdId(idUsuario, -1) retorna TODOS os cursos
- *      do usuário, pois o compareTo do ParIdId trata id2 == -1 como coringa.
- * 
- *  2) indiceNomeCurso — ParNomeId(nomeCurso, idCurso)
- *      Índice indireto por nome, necessário para listar cursos
- *      em ordem alfabética no menu (conforme especificação).
- */
 public class ArquivoCurso extends Arquivo<Curso> {
 
     ArvoreBMais<ParIdId> indiceUsuarioCurso;
     ArvoreBMais<ParNomeId> indiceNomeCurso;
+    HashExtensivel<ParCodigoId> indiceCodigo;
 
     public ArquivoCurso() throws Exception {
         super("cursos", Curso.class.getConstructor());
@@ -35,14 +23,15 @@ public class ArquivoCurso extends Arquivo<Curso> {
             5,
             "./dados/cursos/indiceNomeCurso.btree.db"
         );
+
+        indiceCodigo = new HashExtensivel<>(
+            ParCodigoId.class.getConstructor(),
+            4,
+            "./dados/cursos/indiceCodigo.hash.db",
+            "./dados/cursos/indiceCodigoCestos.hash.db"
+        );
     }
 
-    /**
-     * Insere curso e atualiza os dois índices B+
-     * @param curso - objeto curso a ser criado no db
-     * @return int - id do curso criado no db
-    
-    */
     @Override
     public int create(Curso curso) throws Exception {
         int id = super.create(curso);
@@ -52,14 +41,11 @@ public class ArquivoCurso extends Arquivo<Curso> {
         String nomeTruncado = truncaNome(curso.getNome());
         indiceNomeCurso.create(new ParNomeId(nomeTruncado, id));
 
+        indiceCodigo.create(new ParCodigoId(curso.getCodigo(), id));
+
         return id;
     }
 
-    /**
-     * Remove curso e limpa os dois índices B+
-     * @param int - id do curso no db a ser deletado
-     * @return retorna true para sucesso e false para falha 
-     */
     @Override
     public boolean delete(int id) throws Exception {
         Curso curso = read(id);
@@ -72,15 +58,12 @@ public class ArquivoCurso extends Arquivo<Curso> {
 
             String nomeTruncado = truncaNome(curso.getNome());
             indiceNomeCurso.delete(new ParNomeId(nomeTruncado, id));
+
+            indiceCodigo.delete(Math.abs(curso.getCodigo().hashCode()));
         }
         return removido;
     }
 
-    /**
-     * Atualiza curso e corrige os índices se necessário
-     * @param curso - objeto curso atualizado
-     * @return retorna true para sucesso e false para falha 
-     */
     @Override
     public boolean update(Curso novoCurso) throws Exception {
         Curso cursoAntigo = read(novoCurso.getID());
@@ -102,19 +85,22 @@ public class ArquivoCurso extends Arquivo<Curso> {
                 indiceUsuarioCurso.create(
                     new ParIdId(novoCurso.getIdUsuario(), novoCurso.getID()));
             }
+
+            if (!cursoAntigo.getCodigo().equals(novoCurso.getCodigo())) {
+                indiceCodigo.delete(Math.abs(cursoAntigo.getCodigo().hashCode()));
+                indiceCodigo.create(new ParCodigoId(novoCurso.getCodigo(), novoCurso.getID()));
+            }
         }
         return atualizado;
     }
 
-    /**
-    * Essa é a operação central do relacionamento 1:N.
-    *  A busca na B+ com ParIdId(idUsuario, -1) explora o fato
-    *  de que compareTo retorna 0 quando id2 == -1, trazendo
-    *  todos os pares que compartilham aquele idUsuario.
-     * @param idUsuario - id do usuario a ser lido
-     * @return retorna arraylist do tipo curso com TODOS os cursos do usuário
-     * @throws Exception
-     */
+    public Curso readCodigo(String codigo) throws Exception {
+        ParCodigoId par = indiceCodigo.read(Math.abs(codigo.hashCode()));
+        if (par == null)
+            return null;
+        return read(par.getIdCurso());
+    }
+
     public ArrayList<Curso> readAll(int idUsuario) throws Exception {
         ArrayList<Curso> cursos = new ArrayList<>();
 
@@ -131,12 +117,6 @@ public class ArquivoCurso extends Arquivo<Curso> {
         return cursos;
     }
 
-    /**
-     *  Necessário para montar o menu conforme especificação.
-     * @param idUsuario - id do usuario a ser lido.
-     * @return retorna cursos do usuário em ordem alfabética.
-     * @throws Exception
-     */
     public ArrayList<Curso> readAllOrdenadoPorNome(int idUsuario) throws Exception {
         ArrayList<Curso> cursos = readAll(idUsuario);
 
@@ -149,12 +129,29 @@ public class ArquivoCurso extends Arquivo<Curso> {
         return cursos;
     }
 
-    /**
-     * Verifica se usuario tem cursos
-     * @param idUsuario - id do usuario a ser lido.
-     * @return retorna true se usuario tem cursos, false caso não tenha
-     * @throws Exception
-     */
+    public ArrayList<Curso> readTodosAtivos() throws Exception {
+        ArrayList<Curso> ativos = new ArrayList<>();
+        int id = 1;
+        int vaziosConsecutivos = 0; // Travão de segurança
+
+        // Se procurar 50 IDs seguidos e todos derem nulo, ele quebra o loop
+        while (vaziosConsecutivos < 50) { 
+            Curso c = read(id);
+            
+            if (c != null) {
+                if (c.getEstado() == 0 || c.getEstado() == 1) {
+                    ativos.add(c);
+                }
+                vaziosConsecutivos = 0; // Encontrou um curso válido, zera o contador
+            } else {
+                vaziosConsecutivos++; // Não encontrou, aumenta a contagem de vazios
+            }
+            id++;
+        }
+        
+        return ativos;
+    }
+
     public boolean verificaUsuarioTemCursos(int idUsuario) throws Exception {
         ArrayList<ParIdId> pares = indiceUsuarioCurso.read(
             new ParIdId(idUsuario, -1)
@@ -167,6 +164,7 @@ public class ArquivoCurso extends Arquivo<Curso> {
         super.close();
         indiceUsuarioCurso.close();
         indiceNomeCurso.close();
+        indiceCodigo.close();
     }
 
     private String truncaNome(String nome) {

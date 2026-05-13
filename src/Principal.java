@@ -16,7 +16,7 @@ public class Principal {
             ControleCurso ctrlCurso = new ControleCurso(arqCurso);
 
             VisaoCurso visaoCurso = new VisaoCurso(ctrlCurso, console);
-            VisaoUsuario visaoUsuario = new VisaoUsuario(ctrlUsuario, visaoCurso, console);
+            VisaoUsuario visaoUsuario = new VisaoUsuario(ctrlUsuario, visaoCurso,  ctrlCurso, console);
 
             visaoUsuario.menuUsuario();
 
