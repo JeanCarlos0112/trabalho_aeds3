@@ -23,7 +23,7 @@
 - TesteInscricaoNN: 29/29 (novo teste do N:N)
 - Total acumulado: 72/72 verificações automáticas passando.
 
-### [2026-05-12] — JEAN — TP2: Busca de Cursos (menu Minhas Inscrições)
+### [2026-05-12] — MIRO — TP2: Busca de Cursos (menu Minhas Inscrições)
 #### Arquivos criados:
 
 - entidades/cursos/ParCodigoId.java — Par (codigo, idCurso) de 14 bytes fixos (10 código + 4 id) para uso na Tabela Hash Extensível. Permite localizar um curso pelo NanoID compartilhável em O(1).
