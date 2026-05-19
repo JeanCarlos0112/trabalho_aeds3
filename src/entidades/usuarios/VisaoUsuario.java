@@ -1,10 +1,8 @@
 package entidades.usuarios;
 
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Scanner;
 
-import entidades.cursos.*;
+import entidades.cursos.VisaoCurso;
 
 /**
  * Visão de Usuário — menu principal e telas de login/cadastro/meus dados.
@@ -26,15 +24,12 @@ import entidades.cursos.*;
 public class VisaoUsuario {
     private ControleUsuario controle;
     private VisaoCurso visaoCurso;
-    private ControleCurso controleCurso;
     private Scanner console;
     private Usuario usuarioLogado;
-    private static final DateTimeFormatter FMT_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    public VisaoUsuario(ControleUsuario controle, VisaoCurso visaoCurso, ControleCurso controleCurso, Scanner console) {
+    public VisaoUsuario(ControleUsuario controle, VisaoCurso visaoCurso, Scanner console) {
         this.controle = controle;
         this.visaoCurso = visaoCurso;
-        this.controleCurso = controleCurso;
         this.console = console;
         this.usuarioLogado = null;
     }
@@ -183,122 +178,6 @@ public class VisaoUsuario {
         }
     }
 
-    
-    private void telaListagemPaginada(int idUsuarioLogado) {
-        int paginaAtual = 0;
-        while (true) {
-            try {
-                int totalPaginas = controleCurso.totalPaginas(idUsuarioLogado);
-                ArrayList<Curso> cursos = controleCurso.listarCursosDisponiveisPaginado(idUsuarioLogado, paginaAtual);
-
-                System.out.println("\nEntrePares 1.0");
-                System.out.println("--------------");
-                System.out.println("> Início > Minhas inscrições > Lista de cursos\n");
-                System.out.println("Página " + (paginaAtual + 1) + " de " + Math.max(1, totalPaginas) + "\n");
-
-                if (cursos.isEmpty()) {
-                    System.out.println("(Nenhum curso disponível para inscrição no momento.)\n");
-                } else {
-                    for (int i = 0; i < cursos.size(); i++) {
-                        Curso c = cursos.get(i);
-                        int numExibicao = (i + 1) % 10;
-                        System.out.println("(" + numExibicao + ") " + c.getNome() + " - " + c.getDataInicio().format(FMT_DATA));
-                    }
-                    System.out.println();
-                }
-
-                if (paginaAtual > 0) System.out.println("(A) Página anterior");
-                if (paginaAtual < totalPaginas - 1) System.out.println("(B) Próxima página\n");
-                System.out.println("(R) Retornar ao menu anterior");
-                System.out.print("\nOpção: ");
-
-                String op = console.nextLine().trim().toUpperCase();
-                
-                if (op.equals("A") && paginaAtual > 0) {
-                    paginaAtual--;
-                } else if (op.equals("B") && paginaAtual < totalPaginas - 1) {
-                    paginaAtual++;
-                } else if (op.equals("R")) {
-                    return;
-                } else {
-                    try {
-                        int numDigitado = Integer.parseInt(op);
-                        int indiceLista = (numDigitado == 0) ? 9 : numDigitado - 1;
-                        
-                        if (indiceLista >= 0 && indiceLista < cursos.size()) {
-                            telaDetalheCursoInscricao(cursos.get(indiceLista));
-                        } else {
-                            System.out.println("Número inválido.");
-                        }
-                    } catch (NumberFormatException e) {
-                        System.out.println("Opção inválida.");
-                    }
-                }
-            } catch (Exception e) {
-                System.out.println("Erro ao listar cursos: " + e.getMessage());
-                return;
-            }
-        }
-    }
-
-    private void telaDetalheCursoInscricao(Curso c) {
-        while (true) {
-            System.out.println("\nEntrePares 1.0");
-            System.out.println("--------------");
-            System.out.println("> Início > Minhas inscrições > Lista de cursos > " + c.getNome() + "\n");
-
-            System.out.println("CÓDIGO........: " + c.getCodigo());
-            System.out.println("CURSO.........: " + c.getNome());
-            System.out.println("AUTOR.........: (ID " + c.getIdUsuario() + ")");
-            System.out.println("DESCRIÇÃO.....: " + c.getDescricao());
-            System.out.println("DATA DE INÍCIO: " + c.getDataInicio().format(FMT_DATA) + "\n");
-
-            System.out.println("(A) Fazer minha inscrição no curso\n");
-            System.out.println("(R) Retornar ao menu anterior");
-            System.out.print("\nOpção: ");
-
-            String opcao = console.nextLine().trim().toUpperCase();
-            
-            if (opcao.equals("A")) {
-                System.out.println("\n(A inscrição será efetivada pela classe de Relacionamento N:N - Tarefa do Jean)");
-                return;
-            } else if (opcao.equals("R")) {
-                return;
-            } else {
-                System.out.println("Opção inválida.");
-            }
-        }
-    }
-
-    private void telaCursoInscrito(Curso c) {
-        while (true) {
-            System.out.println("\nEntrePares 1.0");
-            System.out.println("--------------");
-            System.out.println("> Início > Minhas inscrições > " + c.getNome() + "\n");
-
-            System.out.println("CÓDIGO........: " + c.getCodigo());
-            System.out.println("CURSO.........: " + c.getNome());
-            System.out.println("AUTOR.........: (ID " + c.getIdUsuario() + ")");
-            System.out.println("DESCRIÇÃO.....: " + c.getDescricao());
-            System.out.println("DATA DE INÍCIO: " + c.getDataInicio().format(FMT_DATA) + "\n");
-
-            System.out.println("(A) Cancelar minha inscrição no curso\n");
-            System.out.println("(R) Retornar ao menu anterior");
-            System.out.print("\nOpção: ");
-
-            String opcao = console.nextLine().trim().toUpperCase();
-            
-            if (opcao.equals("A")) {
-                System.out.println("\n(A inscrição será cancelada pela classe de Relacionamento N:N - Tarefa do Jean)");
-                return;
-            } else if (opcao.equals("R")) {
-                return;
-            } else {
-                System.out.println("Opção inválida.");
-            }
-        }
-    }
-
     /**
      * Tela LOGIN
      */
@@ -431,51 +310,6 @@ public class VisaoUsuario {
         } catch (Exception e) {
             System.out.println("\nErro no sistema: " + e.getMessage());
             return false;
-        }
-    }
-
-
-    
-    public void menuBuscaCursos(int idUsuarioLogado) {
-        while (true) {
-            System.out.println("\nEntrePares 1.0");
-            System.out.println("--------------");
-            System.out.println("> Início > Minhas inscrições\n");
-            
-            System.out.println("(A) Buscar curso por código");
-            System.out.println("(B) Buscar curso por palavras-chave");
-            System.out.println("(C) Listar todos os cursos\n");
-            System.out.println("(R) Retornar ao menu anterior");
-            System.out.print("\nOpção: ");
-
-            String opcao = console.nextLine().trim().toUpperCase();
-
-            switch (opcao) {
-                case "A":
-                    System.out.print("\nDigite o código do curso (10 caracteres): ");
-                    String codigo = console.nextLine().trim();
-                    try {
-                        Curso c = controleCurso.buscarCursoPorCodigo(codigo);
-                        if (c != null && c.getIdUsuario() != idUsuarioLogado) {
-                            telaDetalheCursoInscricao(c);
-                        } else {
-                            System.out.println("\nCurso não encontrado ou indisponível para inscrição.");
-                        }
-                    } catch (Exception e) {
-                        System.out.println("Erro na busca: " + e.getMessage());
-                    }
-                    break;
-                case "B":
-                    System.out.println("\n(Busca por palavras-chave será implementada no TP3.)");
-                    break;
-                case "C":
-                    telaListagemPaginada(idUsuarioLogado);
-                    break;
-                case "R":
-                    return;
-                default:
-                    System.out.println("Opção inválida.");
-            }
         }
     }
 }

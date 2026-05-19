@@ -10,16 +10,16 @@ import entidades.usuarios.Usuario;
  * Visão de Cursos — menu e telas de entrada/saída.
  *
  * Fluxo conforme PROPOSTA.md:
- * - menuCurso: lista cursos do usuário em ORDEM ALFABÉTICA com
- * número sequencial; digitar o número abre a tela de detalhe;
- * (A) cria novo curso; (R) retorna.
- * - telaDetalheCurso: exibe todos os dados e as opções A–E:
- * (A) Gerenciar inscritos  [placeholder TP2]
- * (B) Corrigir dados do curso
- * (C) Encerrar inscrições  (estado 0 -> 1)
- * (D) Concluir curso       (estado 0/1 -> 2)
- * (E) Cancelar curso
- * (R) Retornar
+ *   - menuCurso: lista cursos do usuário em ORDEM ALFABÉTICA com
+ *     número sequencial; digitar o número abre a tela de detalhe;
+ *     (A) cria novo curso; (R) retorna.
+ *   - telaDetalheCurso: exibe todos os dados e as opções A–E:
+ *       (A) Gerenciar inscritos  [placeholder TP2]
+ *       (B) Corrigir dados do curso
+ *       (C) Encerrar inscrições  (estado 0 -> 1)
+ *       (D) Concluir curso       (estado 0/1 -> 2)
+ *       (E) Cancelar curso
+ *       (R) Retornar
  */
 public class VisaoCurso {
     private static final DateTimeFormatter FMT_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");

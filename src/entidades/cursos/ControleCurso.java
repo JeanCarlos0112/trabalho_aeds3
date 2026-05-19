@@ -8,9 +8,6 @@ import entidades.usuarios.ArquivoUsuario;
 import entidades.usuarios.Usuario;
 
 public class ControleCurso {
-
-    private static final int CURSOS_POR_PAGINA = 10;
-
     private ArquivoCurso arqCurso;
     private ArquivoUsuario arqUsuario;
 
