@@ -8,6 +8,8 @@ A proposta é basicamente as informações previas que o professor responsavel p
 ## CHANGELOG:
 As mudanças detalhadas e a checklist estará no arquivo ao final dessa seção, irei colocar um resumo do changelog para poder ficar de mais facil visualização o que cada participante fez de forma resumida:
 
+**12/05 — JEAN (TP2)**: Implementou a Busca de Cursos completa do menu Minhas Inscrições — busca por código NanoID com novo índice Hash Extensível (ParCodigoId), listagem paginada de cursos disponíveis (10 por página, ordenada por data de início) e tela de detalhe do visitante com resolução de autor. Adicionou também o TesteBuscaCursos com 20 verificações. Falta no TP2 apenas o relacionamento N:N (entidade CursoUsuario) e a efetivação da inscrição.
+
 **15/04 — ANDRÉ**: Criou a Visão e o Controle de cursos, implementando a listagem ordenada alfabeticamente, o sistema de geração automática de códigos NanoID e a lógica de persistência vinculada ao ID do usuário logado.
 
 **15/04 — LUIZ**: Criou a Visão e o Controle de usuários, implementando os menus de sessão (Logado/Deslogado), o sistema de recuperação de senha por pergunta secreta e a lógica de exclusão de conta com validação de cursos ativos.
@@ -34,3 +36,18 @@ O arquivo contempla uma especie de guia para a estrutura de pastas que o **MIRO*
 - [x] Definir e alinhar a estrutura de diretórios final do projeto (ver [GUIA_ESTRUTURA.md](https://github.com/JeanCarlos0112/trabalho_aeds3/blob/main/GUIA_ESTRUTURA.md)).
 - [x] Gravar vídeo de demonstração (até 3 minutos).
 - [x] Preencher checklist do relatório no README.md.
+
+### TP2 — em andamento:
+
+- [x] Implementar a busca de cursos por código NanoID (índice Hash Extensível indiceCodigoCurso). (Responsabilidade: **JEAN**)
+- [x] Implementar a lista paginada de todos os cursos disponíveis (10 por página, ordenada por data de início). (Responsabilidade: **JEAN**)
+- [x] Implementar o menu Minhas Inscrições com as opções de busca. (Responsabilidade: **JEAN**)
+- [ ] Implementar o relacionamento N:N entre Cursos e Usuários usando a entidade de associação CursoUsuario e duas Árvores B+.
+- [ ] Implementar o CRUD de Inscrições (entidade CursoUsuario).
+- [ ] Criar a visão e o controle de inscrições, incluindo a efetivação do botão "Fazer minha inscrição".
+- [ ] Implementar a gestão de inscritos pelo proponente do curso (menu Meus Cursos → Gerenciar inscritos), com exportação em CSV.
+- [ ] Implementar o cancelamento de inscrição pelo aluno.
+- [ ] Assegurar a integridade de dados entre todas as entidades nas operações de cancelamento de curso e exclusão de conta.
+- [ ] Gravar novo vídeo de demonstração do TP2 (até 3 minutos).
+- [ ] Preencher checklist do relatório do TP2 no README.md.
+- [ ] Busca por palavras-chave (reservado para o TP3).

@@ -1,0 +1,26 @@
+# Arquivos de runtime gerados pela base Arquivo do prof
+dados/
+
+# Diretorios de build
+bin/
+out/
+classes/
+*.class
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Outputs de log de teste e backups
+*.log
+*.bak
+*~

@@ -5,66 +5,91 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+
 import aed3.InterfaceHashExtensivel;
 
+/**
+ * Par (codigo, idCurso) para uso na Tabela Hash Extensivel.
+ *
+ * Permite localizar um curso pelo codigo compartilhavel NanoID
+ * (10 caracteres alfanumericos ASCII gerados pelo ControleCurso).
+ *
+ * Tamanho fixo: 10 bytes (codigo) + 4 bytes (id) = 14 bytes.
+ *
+ * O hashCode usa o codigo como chave, garantindo que cursos com
+ * o mesmo NanoID caiam no mesmo bucket (colisao impossivel se o
+ * NanoID for unico, o que e garantido pelo cadastro).
+ */
 public class ParCodigoId implements InterfaceHashExtensivel {
 
     private String codigo;
-    private int idCurso;
+    private int id;
 
+    private static final short TAMANHO_PAR = 14;
     private static final int TAMANHO_CODIGO = 10;
-    private static final short TAMANHO_BYTES = (short) (TAMANHO_CODIGO + Integer.BYTES);
 
     public ParCodigoId() {
-        this.codigo = "          ";
-        this.idCurso = -1;
+        this.codigo = "";
+        this.id = -1;
     }
 
-    public ParCodigoId(String codigo, int idCurso) {
-        this.codigo = (codigo == null) ? "          " : codigo;
-        this.idCurso = idCurso;
+    public ParCodigoId(String codigo, int id) {
+        this.codigo = codigo;
+        this.id = id;
     }
 
-    public String getCodigo() { return codigo; }
-    public int getIdCurso() { return idCurso; }
+    public int getId() {
+        return id;
+    }
+
+    public String getCodigo() {
+        return codigo;
+    }
 
     @Override
     public int hashCode() {
-        int h = 0;
-        for (char ch : codigo.toCharArray()) h = h * 31 + ch;
-        return Math.abs(h);
+        return Math.abs(this.codigo.hashCode());
     }
 
     @Override
-    public short size() { return TAMANHO_BYTES; }
+    public short size() {
+        return TAMANHO_PAR;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + this.codigo + ";" + this.id + ")";
+    }
 
     @Override
     public byte[] toByteArray() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
-        byte[] codigoBytes = codigo.getBytes("UTF-8");
-        byte[] padded = new byte[TAMANHO_CODIGO];
-        for (int i = 0; i < TAMANHO_CODIGO; i++) {
-            padded[i] = (i < codigoBytes.length) ? codigoBytes[i] : (byte) ' ';
+
+        byte[] vb = new byte[TAMANHO_CODIGO];
+        byte[] vbCodigo = this.codigo.getBytes("UTF-8");
+        int i = 0;
+        while (i < vbCodigo.length && i < TAMANHO_CODIGO) {
+            vb[i] = vbCodigo[i];
+            i++;
         }
-        dos.write(padded);
-        dos.writeInt(idCurso);
+        while (i < TAMANHO_CODIGO) {
+            vb[i] = 0; // padding com zero para garantir tamanho fixo
+            i++;
+        }
+        dos.write(vb);
+        dos.writeInt(this.id);
         return baos.toByteArray();
     }
 
     @Override
-    public void fromByteArray(byte[] vb) throws IOException {
-        ByteArrayInputStream bais = new ByteArrayInputStream(vb);
+    public void fromByteArray(byte[] ba) throws IOException {
+        ByteArrayInputStream bais = new ByteArrayInputStream(ba);
         DataInputStream dis = new DataInputStream(bais);
-        byte[] codigoBytes = new byte[TAMANHO_CODIGO];
-        dis.readFully(codigoBytes);
-        this.codigo = new String(codigoBytes, "UTF-8").trim();
-        this.idCurso = dis.readInt();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof ParCodigoId)) return false;
-        return this.codigo.equals(((ParCodigoId) obj).codigo);
+        byte[] vb = new byte[TAMANHO_CODIGO];
+        dis.read(vb);
+        // trim() remove tanto espacos quanto bytes nulos (codigo <= 0x20)
+        this.codigo = new String(vb, "UTF-8").trim();
+        this.id = dis.readInt();
     }
 }

@@ -1,13 +1,31 @@
 package entidades.cursos;
 
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import aed3.*;
 
+/**
+ *
+ * Indices adicionais:
+ *
+ *  1) indiceUsuarioCurso (Arvore B+) - ParIdId(idUsuario, idCurso)
+ *      Registra o relacionamento 1:N entre usuarios e cursos.
+ *      Busca com ParIdId(idUsuario, -1) retorna TODOS os cursos
+ *      do usuario, pois o compareTo do ParIdId trata id2 == -1 como coringa.
+ *
+ *  2) indiceNomeCurso (Arvore B+) - ParNomeId(nomeCurso, idCurso)
+ *      Indice indireto por nome, necessario para listar cursos
+ *      em ordem alfabetica no menu (conforme especificacao do TP1).
+ *
+ *  3) indiceCodigoCurso (Hash Extensivel) - ParCodigoId(codigo, idCurso)
+ *      Indice indireto por codigo NanoID, usado na busca de cursos
+ *      por codigo na tela "Minhas Inscricoes" (TP2).
+ */
 public class ArquivoCurso extends Arquivo<Curso> {
 
     ArvoreBMais<ParIdId> indiceUsuarioCurso;
     ArvoreBMais<ParNomeId> indiceNomeCurso;
-    HashExtensivel<ParCodigoId> indiceCodigo;
+    HashExtensivel<ParCodigoId> indiceCodigoCurso;
 
     public ArquivoCurso() throws Exception {
         super("cursos", Curso.class.getConstructor());
@@ -24,14 +42,17 @@ public class ArquivoCurso extends Arquivo<Curso> {
             "./dados/cursos/indiceNomeCurso.btree.db"
         );
 
-        indiceCodigo = new HashExtensivel<>(
+        indiceCodigoCurso = new HashExtensivel<>(
             ParCodigoId.class.getConstructor(),
             4,
-            "./dados/cursos/indiceCodigo.hash.db",
-            "./dados/cursos/indiceCodigoCestos.hash.db"
+            "./dados/cursos/indiceCodigo.d.db",
+            "./dados/cursos/indiceCodigo.c.db"
         );
     }
 
+    /**
+     * Insere curso e atualiza os tres indices.
+     */
     @Override
     public int create(Curso curso) throws Exception {
         int id = super.create(curso);
@@ -41,11 +62,14 @@ public class ArquivoCurso extends Arquivo<Curso> {
         String nomeTruncado = truncaNome(curso.getNome());
         indiceNomeCurso.create(new ParNomeId(nomeTruncado, id));
 
-        indiceCodigo.create(new ParCodigoId(curso.getCodigo(), id));
+        indiceCodigoCurso.create(new ParCodigoId(curso.getCodigo(), id));
 
         return id;
     }
 
+    /**
+     * Remove curso e limpa os tres indices.
+     */
     @Override
     public boolean delete(int id) throws Exception {
         Curso curso = read(id);
@@ -59,11 +83,18 @@ public class ArquivoCurso extends Arquivo<Curso> {
             String nomeTruncado = truncaNome(curso.getNome());
             indiceNomeCurso.delete(new ParNomeId(nomeTruncado, id));
 
-            indiceCodigo.delete(Math.abs(curso.getCodigo().hashCode()));
+            indiceCodigoCurso.delete(Math.abs(curso.getCodigo().hashCode()));
         }
         return removido;
     }
 
+    /**
+     * Atualiza curso e corrige os indices se necessario.
+     *
+     * O codigo NanoID nao muda em operacoes normais de update
+     * (a Visao nao expoe alteracao do codigo), mas o indice de
+     * codigo e mantido por seguranca caso isso mude no futuro.
+     */
     @Override
     public boolean update(Curso novoCurso) throws Exception {
         Curso cursoAntigo = read(novoCurso.getID());
@@ -87,20 +118,20 @@ public class ArquivoCurso extends Arquivo<Curso> {
             }
 
             if (!cursoAntigo.getCodigo().equals(novoCurso.getCodigo())) {
-                indiceCodigo.delete(Math.abs(cursoAntigo.getCodigo().hashCode()));
-                indiceCodigo.create(new ParCodigoId(novoCurso.getCodigo(), novoCurso.getID()));
+                indiceCodigoCurso.delete(Math.abs(cursoAntigo.getCodigo().hashCode()));
+                indiceCodigoCurso.create(
+                    new ParCodigoId(novoCurso.getCodigo(), novoCurso.getID()));
             }
         }
         return atualizado;
     }
 
-    public Curso readCodigo(String codigo) throws Exception {
-        ParCodigoId par = indiceCodigo.read(Math.abs(codigo.hashCode()));
-        if (par == null)
-            return null;
-        return read(par.getIdCurso());
-    }
-
+    /**
+     * Operacao central do relacionamento 1:N.
+     * Busca na B+ com ParIdId(idUsuario, -1) explora o fato de que
+     * compareTo retorna 0 quando id2 == -1, trazendo todos os pares
+     * que compartilham aquele idUsuario.
+     */
     public ArrayList<Curso> readAll(int idUsuario) throws Exception {
         ArrayList<Curso> cursos = new ArrayList<>();
 
@@ -117,6 +148,9 @@ public class ArquivoCurso extends Arquivo<Curso> {
         return cursos;
     }
 
+    /**
+     * Cursos do usuario em ordem alfabetica (usado no menu Meus Cursos do TP1).
+     */
     public ArrayList<Curso> readAllOrdenadoPorNome(int idUsuario) throws Exception {
         ArrayList<Curso> cursos = readAll(idUsuario);
 
@@ -129,29 +163,10 @@ public class ArquivoCurso extends Arquivo<Curso> {
         return cursos;
     }
 
-    public ArrayList<Curso> readTodosAtivos() throws Exception {
-        ArrayList<Curso> ativos = new ArrayList<>();
-        int id = 1;
-        int vaziosConsecutivos = 0; // Travão de segurança
-
-        // Se procurar 50 IDs seguidos e todos derem nulo, ele quebra o loop
-        while (vaziosConsecutivos < 50) { 
-            Curso c = read(id);
-            
-            if (c != null) {
-                if (c.getEstado() == 0 || c.getEstado() == 1) {
-                    ativos.add(c);
-                }
-                vaziosConsecutivos = 0; // Encontrou um curso válido, zera o contador
-            } else {
-                vaziosConsecutivos++; // Não encontrou, aumenta a contagem de vazios
-            }
-            id++;
-        }
-        
-        return ativos;
-    }
-
+    /**
+     * Verifica se usuario tem cursos cadastrados.
+     * Usado pelo ControleUsuario para bloquear exclusao de conta com cursos ativos.
+     */
     public boolean verificaUsuarioTemCursos(int idUsuario) throws Exception {
         ArrayList<ParIdId> pares = indiceUsuarioCurso.read(
             new ParIdId(idUsuario, -1)
@@ -159,12 +174,88 @@ public class ArquivoCurso extends Arquivo<Curso> {
         return !pares.isEmpty();
     }
 
+    /**
+     * Busca um curso pelo codigo NanoID compartilhavel.
+     * Usado na tela de busca por codigo do menu Minhas Inscricoes (TP2).
+     *
+     * @param codigo - codigo NanoID de 10 caracteres
+     * @return o Curso correspondente ou null se nao existir
+     */
+    public Curso readByCodigo(String codigo) throws Exception {
+        if (codigo == null || codigo.isEmpty())
+            return null;
+
+        ParCodigoId par = indiceCodigoCurso.read(Math.abs(codigo.hashCode()));
+        if (par == null)
+            return null;
+
+        // Confirmacao por igualdade exata: protege contra colisoes
+        // teoricas de hashCode. O codigo recuperado deve casar com o buscado.
+        if (!par.getCodigo().equals(codigo))
+            return null;
+
+        return read(par.getId());
+    }
+
+    /**
+     * Le TODOS os cursos do arquivo de dados, varrendo o dados.db
+     * sequencialmente e ignorando registros com lapide '*' (excluidos).
+     *
+     * A base Arquivo do prof nao expoe iteracao e a referencia ao
+     * RandomAccessFile e package-private em aed3. Para nao alterar
+     * o codigo do professor, abre-se aqui um leitor proprio em modo
+     * read-only sobre o mesmo arquivo dados.db. E seguro em ambiente
+     * single-thread (que e o caso do nosso programa).
+     *
+     * Layout do registro (definido por Arquivo.create):
+     *   byte lapide (' ' valido, '*' excluido)
+     *   short tamanho do registro
+     *   byte[] dados
+     *
+     * Cabecalho do arquivo (12 bytes): int ultimoID + long cabecaListaVazios.
+     *
+     * @return lista com todos os cursos validos
+     */
+    public ArrayList<Curso> readAllCursos() throws Exception {
+        ArrayList<Curso> cursos = new ArrayList<>();
+        RandomAccessFile leitor = new RandomAccessFile(
+            "./dados/cursos/dados.db", "r");
+
+        try {
+            if (leitor.length() < TAM_CABECALHO)
+                return cursos;
+
+            leitor.seek(TAM_CABECALHO); // pula o cabecalho
+
+            while (leitor.getFilePointer() < leitor.length()) {
+                byte lapide = leitor.readByte();
+                short tam = leitor.readShort();
+
+                if (tam <= 0) break; // dados corrompidos
+
+                byte[] buffer = new byte[tam];
+                int lido = leitor.read(buffer);
+                if (lido < tam) break;
+
+                if (lapide == ' ') {
+                    Curso c = new Curso();
+                    c.fromByteArray(buffer);
+                    cursos.add(c);
+                }
+            }
+        } finally {
+            leitor.close();
+        }
+
+        return cursos;
+    }
+
     @Override
     public void close() throws Exception {
         super.close();
         indiceUsuarioCurso.close();
         indiceNomeCurso.close();
-        indiceCodigo.close();
+        indiceCodigoCurso.close();
     }
 
     private String truncaNome(String nome) {

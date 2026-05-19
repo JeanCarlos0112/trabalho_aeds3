@@ -1,3 +1,23 @@
+### [2026-05-12] — JEAN — TP2: Busca de Cursos (menu Minhas Inscrições)
+#### Arquivos criados:
+
+- entidades/cursos/ParCodigoId.java — Par (codigo, idCurso) de 14 bytes fixos (10 código + 4 id) para uso na Tabela Hash Extensível. Permite localizar um curso pelo NanoID compartilhável em O(1).
+- TesteBuscaCursos.java — Arquivo de teste com 20 verificações cobrindo: geração de NanoID único com SecureRandom, busca por código (positiva, negativa, código vazio/null), listagem filtrada por estado 0, ordenação por data de início, resolução de autor e sincronização do índice de código após delete.
+
+#### Arquivos modificados:
+
+- entidades/cursos/ArquivoCurso.java — Adicionado o terceiro índice `indiceCodigoCurso` (Hash Extensível) sincronizado em create/delete/update. Novos métodos: `readByCodigo(String codigo)` para a busca por NanoID e `readAllCursos()` que varre o `dados.db` diretamente via RandomAccessFile próprio em modo read-only (não altera a base Arquivo do prof).
+- entidades/cursos/ControleCurso.java — Acrescentada dependência de ArquivoUsuario para resolver autores. Novos métodos: `buscarPorCodigo`, `listarTodosCursosDisponiveis` (filtra estado 0 e ordena por data) e `buscarAutor`. Geração do NanoID trocada de `java.util.Random` para `java.security.SecureRandom` (padrão NanoID), com dedup contra colisão.
+- entidades/cursos/VisaoCurso.java — Adicionado o menu "Minhas Inscrições" (menuInscricoes) com as 3 opções: (A) buscar por código, (B) palavras-chave [placeholder TP3], (C) listar todos. Telas: telaBuscaPorCodigo, telaListaCursos (paginação 10/página, item 10 → "(0)"), telaDetalheCursoVisitante (com campo AUTOR e botão de inscrição condicional ao estado 0 e não-dono).
+- entidades/usuarios/VisaoUsuario.java — Placeholder "Minhas inscrições sera implementado no TP2" substituído pelo wire correto que chama `visaoCurso.menuInscricoes(usuarioLogado.getID())`.
+- Principal.java — Construtor de ControleCurso atualizado para receber também `arqUsuario`, necessário para a resolução do autor na tela de detalhe de busca.
+
+#### Observações:
+
+- A efetivação da inscrição (botão "Fazer minha inscrição") fica como placeholder e será ligada ao Controle de Inscrição na próxima etapa do TP2 (relacionamento N:N + CRUD CursoUsuario).
+- TesteRelacionamento1N continua 23/23 verde (regressão TP1 intacta).
+- TesteBuscaCursos: 20/20 verde.
+
 ### [2026-04-15] — LUIZ — Visão e Controle de Usuários
 #### Arquivos criados:
 
