@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import entidades.usuarios.Usuario;
+import entidades.inscricoes.ControleInscricao;
+import entidades.inscricoes.VisaoInscricao;
 
 /**
  * Visão de Cursos — menu e telas de entrada/saída.
@@ -14,22 +16,52 @@ import entidades.usuarios.Usuario;
  *     número sequencial; digitar o número abre a tela de detalhe;
  *     (A) cria novo curso; (R) retorna.
  *   - telaDetalheCurso: exibe todos os dados e as opções A–E:
- *       (A) Gerenciar inscritos  [placeholder TP2]
+ *       (A) Gerenciar inscritos    (delega para VisaoInscricao)
  *       (B) Corrigir dados do curso
- *       (C) Encerrar inscrições  (estado 0 -> 1)
- *       (D) Concluir curso       (estado 0/1 -> 2)
- *       (E) Cancelar curso
+ *       (C) Encerrar inscrições    (estado 0 -> 1)
+ *       (D) Concluir curso         (estado 0/1 -> 2)
+ *       (E) Cancelar curso         (cancela inscricoes em cascata)
  *       (R) Retornar
+ *
+ *   - telaBuscaPorCodigoInscricao + telaListaCursosInscricao + nomeAutor:
+ *     pontos de entrada chamados pelo VisaoInscricao na rota Minhas
+ *     Inscricoes do menu logado.
+ *   - telaDetalheCursoVisitante: detalhe de curso de outra pessoa, com
+ *     botao de inscricao real (efetiva via ControleInscricao).
  */
 public class VisaoCurso {
     private static final DateTimeFormatter FMT_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private ControleCurso controle;
+    private ControleInscricao controleInscricao;
     private Scanner console;
 
-    public VisaoCurso(ControleCurso controle, Scanner console) {
+    // Injetado via setter para evitar dependencia circular (VisaoInscricao
+    // depende de VisaoCurso para delegar busca/lista, e VisaoCurso depende
+    // de VisaoInscricao para abrir a tela "Gerenciar inscritos").
+    private VisaoInscricao visaoInscricao;
+
+    public VisaoCurso(ControleCurso controle, ControleInscricao controleInscricao, Scanner console) {
         this.controle = controle;
+        this.controleInscricao = controleInscricao;
         this.console = console;
+    }
+
+    public void setVisaoInscricao(VisaoInscricao visaoInscricao) {
+        this.visaoInscricao = visaoInscricao;
+    }
+
+    /**
+     * Acessor publico do nome do autor de um curso a partir do idUsuario,
+     * exposto para VisaoInscricao montar a tela de detalhe de uma inscricao.
+     */
+    public String nomeAutor(int idUsuario) {
+        try {
+            Usuario u = controle.buscarAutor(idUsuario);
+            return u != null ? u.getNome() : "(autor removido)";
+        } catch (Exception e) {
+            return "(autor desconhecido)";
+        }
     }
 
     /**
@@ -171,7 +203,11 @@ public class VisaoCurso {
             try {
                 switch (opcao) {
                     case "A":
-                        System.out.println("\n(Funcionalidade de gerenciamento de inscritos sera implementada no TP2.)");
+                        if (visaoInscricao != null) {
+                            visaoInscricao.telaGerenciarInscritos(c);
+                        } else {
+                            System.out.println("\n(VisaoInscricao nao injetada.)");
+                        }
                         break;
                     case "B":
                         telaCorrecaoDados(c);
@@ -199,11 +235,19 @@ public class VisaoCurso {
                             System.out.println("Curso ja encerrado; nao pode ser cancelado novamente.");
                             break;
                         }
+                        int totalInscritos = controleInscricao.contarInscritos(c.getID());
+                        if (totalInscritos > 0) {
+                            System.out.println("Atencao: o curso tem " + totalInscritos
+                                + " inscrito(s). Cancelar o curso tambem cancelara essas inscricoes.");
+                        }
                         System.out.print("Confirma o cancelamento do curso? (S/N): ");
                         String conf = console.nextLine().trim();
                         if (conf.equalsIgnoreCase("S")) {
                             if (controle.excluirCurso(c.getID())) {
-                                System.out.println("\nCurso cancelado e removido do sistema (nenhum inscrito).");
+                                System.out.println("\nCurso cancelado e removido do sistema"
+                                    + (totalInscritos > 0
+                                        ? " (" + totalInscritos + " inscricao/oes canceladas em cascata)."
+                                        : " (nenhum inscrito)."));
                                 return;
                             } else {
                                 System.out.println("Falha ao cancelar o curso.");
@@ -267,62 +311,11 @@ public class VisaoCurso {
     }
 
     // ============================================================
-    //  TP2 - Menu Minhas Inscricoes (busca de cursos)
+    //  TP2 - Telas de busca/lista chamadas a partir do VisaoInscricao
     // ============================================================
-
-    /**
-     * Menu "Minhas Inscricoes" - ponto de entrada da busca de cursos do TP2.
-     * Estrutura completa conforme especificacao:
-     *
-     *   INSCRICOES
-     *   (n) <lista dos cursos em que o usuario esta inscrito>
-     *
-     *   (A) Buscar curso por codigo
-     *   (B) Buscar curso por palavras-chave   [TP3]
-     *   (C) Listar todos os cursos
-     *   (R) Retornar ao menu anterior
-     *
-     * @param idUsuarioLogado - id do usuario ativo no sistema
-     */
-    public void menuInscricoes(int idUsuarioLogado) {
-        while (true) {
-            System.out.println("\nG12 TP1 1.2");
-            System.out.println("--------------");
-            System.out.println("> Inicio > Minhas Inscricoes\n");
-
-            System.out.println("INSCRICOES");
-            // A listagem das inscricoes propriamente ditas depende do
-            // relacionamento N:N (entidade CursoUsuario), que ainda nao
-            // foi implementado. Sera ligada ao Controle de Inscricao
-            // assim que o N:N estiver pronto.
-            System.out.println("(Nenhuma inscricao no momento.)");
-
-            System.out.println();
-            System.out.println("(A) Buscar curso por codigo");
-            System.out.println("(B) Buscar curso por palavras-chave");
-            System.out.println("(C) Listar todos os cursos");
-            System.out.println();
-            System.out.println("(R) Retornar ao menu anterior");
-            System.out.print("\nOpcao: ");
-
-            String op = console.nextLine().trim().toUpperCase();
-            switch (op) {
-                case "A":
-                    telaBuscaPorCodigo(idUsuarioLogado);
-                    break;
-                case "B":
-                    System.out.println("\n(Busca por palavras-chave sera implementada no TP3.)");
-                    break;
-                case "C":
-                    telaListaCursos(idUsuarioLogado);
-                    break;
-                case "R":
-                    return;
-                default:
-                    System.out.println("Opcao invalida.");
-            }
-        }
-    }
+    //
+    // O menu "Minhas Inscricoes" agora vive em VisaoInscricao, que
+    // delega as duas telas de busca para os metodos publicos abaixo.
 
     /**
      * Busca curso por codigo NanoID. Pede o codigo ao usuario e,
@@ -330,7 +323,7 @@ public class VisaoCurso {
      * Conforme a especificacao: "Quando a busca for por codigo,
      * a tela de lista nao precisa ser mostrada, apenas a tela [de detalhe]."
      */
-    private void telaBuscaPorCodigo(int idUsuarioLogado) {
+    public void telaBuscaPorCodigoInscricao(int idUsuarioLogado) {
         System.out.println("\nG12 TP1 1.2");
         System.out.println("--------------");
         System.out.println("> Inicio > Minhas Inscricoes > Buscar por codigo\n");
@@ -366,7 +359,7 @@ public class VisaoCurso {
      *   (9) nono
      *   (0) decimo
      */
-    private void telaListaCursos(int idUsuarioLogado) {
+    public void telaListaCursosInscricao(int idUsuarioLogado) {
         ArrayList<Curso> cursos;
         try {
             cursos = controle.listarTodosCursosDisponiveis();
@@ -463,6 +456,7 @@ public class VisaoCurso {
         while (true) {
             Curso c;
             Usuario autor;
+            boolean jaInscrito;
             try {
                 c = controle.buscarCurso(idCurso);
                 if (c == null) {
@@ -470,6 +464,7 @@ public class VisaoCurso {
                     return;
                 }
                 autor = controle.buscarAutor(c.getIdUsuario());
+                jaInscrito = controleInscricao.estaInscrito(idCurso, idUsuarioLogado);
             } catch (Exception e) {
                 System.out.println("Erro ao ler curso: " + e.getMessage());
                 return;
@@ -491,40 +486,83 @@ public class VisaoCurso {
             boolean dono = (c.getIdUsuario() == idUsuarioLogado);
             boolean inscricoesAbertas = (c.getEstado() == 0);
 
+            // Decide qual acao mostrar:
+            //   - Dono do curso        -> aviso, sem botao
+            //   - Ja inscrito          -> botao "Cancelar minha inscricao"
+            //   - Nao inscrito + estado 0 -> botao "Fazer minha inscricao"
+            //   - Outros estados       -> aviso, sem botao
+            String acao = null;    // "INSCREVER", "CANCELAR" ou null
             if (dono) {
                 System.out.println("(Voce e o autor deste curso. Gerencie-o em Meus Cursos.)");
+            } else if (jaInscrito) {
+                System.out.println("Voce ja esta inscrito neste curso.");
+                acao = "CANCELAR";
             } else if (!inscricoesAbertas) {
                 switch (c.getEstado()) {
                     case 1: System.out.println("Este curso ja nao aceita novas inscricoes."); break;
                     case 2: System.out.println("Este curso ja foi concluido."); break;
                     case 3: System.out.println("Este curso foi cancelado.");      break;
                 }
+            } else {
+                acao = "INSCREVER";
             }
             System.out.println();
 
-            if (!dono && inscricoesAbertas) {
+            if ("INSCREVER".equals(acao))
                 System.out.println("(A) Fazer minha inscricao no curso");
-            }
+            else if ("CANCELAR".equals(acao))
+                System.out.println("(A) Cancelar minha inscricao no curso");
             System.out.println("(R) Retornar ao menu anterior");
             System.out.print("\nOpcao: ");
 
             String op = console.nextLine().trim().toUpperCase();
-            switch (op) {
-                case "A":
-                    if (!dono && inscricoesAbertas) {
-                        // Placeholder: a efetivacao da inscricao depende do
-                        // relacionamento N:N (entidade CursoUsuario), proxima
-                        // tarefa do TP2. Sera ligada ao Controle de Inscricao.
-                        System.out.println("\n(Efetivacao da inscricao sera implementada "
-                            + "junto com o relacionamento N:N.)");
-                    } else {
-                        System.out.println("Opcao invalida.");
+            if (op.equals("R")) return;
+
+            if (op.equals("A")) {
+                if ("INSCREVER".equals(acao)) {
+                    try {
+                        int status = controleInscricao.inscrever(idCurso, idUsuarioLogado);
+                        switch (status) {
+                            case ControleInscricao.OK_INSCRITO:
+                                System.out.println("\nInscricao realizada com sucesso!");
+                                break;
+                            case ControleInscricao.ERRO_CURSO_INEXISTENTE:
+                                System.out.println("\nCurso nao existe mais.");
+                                return;
+                            case ControleInscricao.ERRO_CURSO_NAO_DISPONIVEL:
+                                System.out.println("\nEste curso nao esta mais recebendo inscricoes.");
+                                break;
+                            case ControleInscricao.ERRO_DONO_INSCREVENDO_NO_PROPRIO:
+                                System.out.println("\nVoce nao pode se inscrever no seu proprio curso.");
+                                break;
+                            case ControleInscricao.ERRO_JA_INSCRITO:
+                                System.out.println("\nVoce ja esta inscrito neste curso.");
+                                break;
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Erro ao inscrever: " + e.getMessage());
                     }
-                    break;
-                case "R":
-                    return;
-                default:
+                } else if ("CANCELAR".equals(acao)) {
+                    System.out.print("Confirma o cancelamento da sua inscricao? (S/N): ");
+                    String conf = console.nextLine().trim();
+                    if (conf.equalsIgnoreCase("S")) {
+                        try {
+                            if (controleInscricao.cancelarInscricaoCursoUsuario(
+                                    idCurso, idUsuarioLogado))
+                                System.out.println("\nInscricao cancelada com sucesso.");
+                            else
+                                System.out.println("Falha ao cancelar.");
+                        } catch (Exception e) {
+                            System.out.println("Erro: " + e.getMessage());
+                        }
+                    } else {
+                        System.out.println("Cancelamento abortado.");
+                    }
+                } else {
                     System.out.println("Opcao invalida.");
+                }
+            } else {
+                System.out.println("Opcao invalida.");
             }
         }
     }

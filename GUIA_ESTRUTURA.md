@@ -23,19 +23,26 @@ projeto/
 │   │   │   ├── Usuario.java                   ← Entidade (MIRO)
 │   │   │   ├── ArquivoUsuario.java            ← CRUD + índice email (MIRO + JEAN)
 │   │   │   ├── ParEmailId.java                ← Par (email, id) para hash (JEAN)
-│   │   │   ├── VisaoUsuario.java              ← View — E/S de dados (LUIZ)
-│   │   │   └── ControleUsuario.java           ← Controller — lógica + menu (LUIZ)
+│   │   │   ├── VisaoUsuario.java              ← View — E/S de dados (LUIZ + JEAN no TP2)
+│   │   │   └── ControleUsuario.java           ← Controller — lógica + menu (LUIZ + JEAN no TP2)
 │   │   │
-│   │   └── cursos/
-│   │       ├── Curso.java                     ← Entidade (MIRO)
-│   │       ├── ArquivoCurso.java              ← CRUD + B+ 1:N + Hash código (JEAN)
-│   │       ├── ParCodigoId.java               ← Par (código, id) p/ hash NanoID (JEAN, TP2)
-│   │       ├── VisaoCurso.java                ← View — E/S de dados (ANDRÉ + JEAN no TP2)
-│   │       └── ControleCurso.java             ← Controller — lógica + menu (ANDRÉ + JEAN no TP2)
+│   │   ├── cursos/
+│   │   │   ├── Curso.java                     ← Entidade (MIRO)
+│   │   │   ├── ArquivoCurso.java              ← CRUD + B+ 1:N + Hash código (JEAN)
+│   │   │   ├── ParCodigoId.java               ← Par (código, id) p/ hash NanoID (JEAN, TP2)
+│   │   │   ├── VisaoCurso.java                ← View — E/S de dados (ANDRÉ + JEAN no TP2)
+│   │   │   └── ControleCurso.java             ← Controller — lógica + menu (ANDRÉ + JEAN no TP2)
+│   │   │
+│   │   └── inscricoes/                        ← (JEAN, TP2)
+│   │       ├── CursoUsuario.java              ← Entidade de associação N:N
+│   │       ├── ArquivoCursoUsuario.java       ← CRUD + 2 Árvores B+ do N:N
+│   │       ├── ControleInscricao.java         ← Controller — lógica de inscrever/cancelar
+│   │       └── VisaoInscricao.java            ← View — telas de inscrições e gestão
 │   │
 │   ├── Principal.java                         ← Main (menu de login + menu principal)
 │   ├── TesteRelacionamento1N.java             ← Teste de regressão do TP1 (23 verificações)
-│   └── TesteBuscaCursos.java                  ← Teste da Busca de Cursos do TP2 (20 verificações)
+│   ├── TesteBuscaCursos.java                  ← Teste da Busca de Cursos do TP2 (20 verificações)
+│   └── TesteInscricaoNN.java                  ← Teste do Relacionamento N:N do TP2 (29 verificações)
 │
 └── dados/                                     ← Gerado automaticamente em runtime
     ├── usuarios/
@@ -44,14 +51,20 @@ projeto/
     │   ├── indiceDireto.c.db
     │   ├── indiceEmail.d.db
     │   └── indiceEmail.c.db
-    └── cursos/
+    ├── cursos/
+    │   ├── dados.db
+    │   ├── indiceDireto.d.db
+    │   ├── indiceDireto.c.db
+    │   ├── indiceUsuarioCurso.btree.db        ← Árvore B+ do relacionamento 1:N
+    │   ├── indiceNomeCurso.btree.db           ← Árvore B+ por nome (ordem alfabética)
+    │   ├── indiceCodigo.d.db                  ← Hash Extensível por NanoID (TP2)
+    │   └── indiceCodigo.c.db
+    └── inscricoes/                            ← (TP2)
         ├── dados.db
         ├── indiceDireto.d.db
         ├── indiceDireto.c.db
-        ├── indiceUsuarioCurso.btree.db        ← Árvore B+ do relacionamento 1:N
-        ├── indiceNomeCurso.btree.db           ← Árvore B+ por nome (ordem alfabética)
-        ├── indiceCodigo.d.db                  ← Hash Extensível por NanoID (TP2)
-        └── indiceCodigo.c.db
+        ├── indiceCursoInscricao.btree.db      ← Árvore B+ por idCurso (N:N lado dono)
+        └── indiceUsuarioInscricao.btree.db    ← Árvore B+ por idUsuario (N:N lado aluno)
 ```
 
 ## O que o **JEAN** entregou (relacionamento 1:N)
@@ -339,4 +352,153 @@ O fluxo completo do menu Minhas Inscrições, da busca até a tela de detalhe:
 5. A tela busca o curso por id e o autor por `ControleCurso.buscarAutor`
 6. Renderiza CÓDIGO, CURSO, AUTOR, DESCRIÇÃO, DATA, e o botão (A) só se
    o curso está em estado 0 e o visitante não é o dono
+
+
+---
+
+## O que o **JEAN** entregou (TP2 — Relacionamento N:N)
+
+Esta etapa completa o TP2 implementando a entidade de associação `CursoUsuario`,
+as duas Árvores B+ que sustentam o relacionamento N:N, todas as visões de
+inscrição e a integridade referencial em cascata.
+
+### 1. `CursoUsuario.java` → `entidades/inscricoes/`
+
+Entidade de associação do N:N. Atributos: `idCursoUsuario` (chave própria),
+`idCurso` (FK), `idUsuario` (FK) e `dataInscricao` (LocalDate, serializada
+como long via epochDay no mesmo padrão usado por Curso). Tamanho 20 bytes
+fixos. Cada registro representa uma inscrição.
+
+### 2. `ArquivoCursoUsuario.java` → `entidades/inscricoes/`
+
+CRUD que estende `Arquivo<CursoUsuario>` com **duas Árvores B+** mantidas
+sincronizadas em `create`, `delete` e `update`:
+
+- **`indiceCursoInscricao`** — `ParIdId(idCurso, idCursoUsuario)`
+  Permite recuperar todas as inscrições de um curso (lado dono).
+- **`indiceUsuarioInscricao`** — `ParIdId(idUsuario, idCursoUsuario)`
+  Permite recuperar todas as inscrições de um usuário (lado aluno).
+
+Métodos públicos novos:
+
+| Método                                    | O que faz                                                |
+|-------------------------------------------|----------------------------------------------------------|
+| `readByCurso(int idCurso)`                | Lista todas as inscrições daquele curso                  |
+| `readByUsuario(int idUsuario)`            | Lista todas as inscrições daquele usuário                |
+| `existeInscricao(idCurso, idUsuario)`     | true/false para inscrição já existente                   |
+| `buscarIdInscricao(idCurso, idUsuario)`   | Retorna o id da inscrição (ou -1)                        |
+| `deleteAllByCurso(int idCurso)`           | Cascata: remove todas as inscrições daquele curso        |
+| `deleteAllByUsuario(int idUsuario)`       | Cascata: remove todas as inscrições daquele usuário      |
+
+### 3. `ControleInscricao.java` → `entidades/inscricoes/`
+
+Orquestra `ArquivoCursoUsuario` com `ArquivoCurso` e `ArquivoUsuario`.
+
+Regras de negócio validadas no `inscrever`, devolvidas como códigos de status
+(para a Visão renderizar a mensagem certa sem precisar capturar exceptions):
+
+| Código                              | Significado                                            |
+|-------------------------------------|--------------------------------------------------------|
+| `OK_INSCRITO`                       | Inscrição efetivada com sucesso                        |
+| `ERRO_CURSO_INEXISTENTE`            | idCurso não existe                                     |
+| `ERRO_CURSO_NAO_DISPONIVEL`         | Curso não está no estado 0 (não recebe inscrições)     |
+| `ERRO_DONO_INSCREVENDO_NO_PROPRIO`  | Dono tentando se inscrever no próprio curso            |
+| `ERRO_JA_INSCRITO`                  | Usuário já está inscrito neste curso                   |
+
+Outros métodos: `cancelarInscricao`, `cancelarInscricaoCursoUsuario`,
+`estaInscrito`, `listarMinhasInscricoes` (lado aluno, ordenado por data),
+`listarInscritos` (lado dono, ordem alfabética), `contarInscritos`, e
+`exportarCSV` (com escape RFC 4180 para vírgulas, aspas e quebras de linha).
+
+### 4. `VisaoInscricao.java` → `entidades/inscricoes/`
+
+Quatro telas conforme a especificação:
+
+- **`menuMinhasInscricoes(int idUsuarioLogado)`** — ponto de entrada do menu
+  Minhas Inscrições. Lista as inscrições atuais do usuário no topo
+  (numeradas) com sufixo de estado do curso quando aplicável: `(INSCRICOES
+  ENCERRADAS)`, `(CURSO CONCLUIDO)`, `(CURSO CANCELADO)`. Delega as três
+  opções de busca para VisaoCurso. Digitar o número de uma inscrição abre
+  o detalhe correspondente.
+- **`telaDetalheMinhaInscricao`** — exibe CÓDIGO, CURSO, AUTOR, DESCRIÇÃO,
+  DATA DE INÍCIO, INSCRITO EM e STATUS (se diferente do estado 0), com
+  botão "(A) Cancelar minha inscrição".
+- **`telaGerenciarInscritos(Curso curso)`** — acessada de Meus Cursos > curso
+  > "(A) Gerenciar inscritos". Lista numerada dos inscritos com nome + data,
+  botão "(A) Exportar lista" (gera CSV em `./exportacoes/inscritos_<codigo>.csv`)
+  e selecionar um inscrito abre o detalhe dele.
+- **`telaDetalheInscrito`** — exibe NOME, EMAIL e DATA DE INSCRIÇÃO do aluno
+  para o dono do curso, com opção de cancelar a inscrição daquele aluno
+  específico.
+
+### 5. Alterações em arquivos existentes
+
+- **`VisaoCurso.java`** — Recebe `ControleInscricao` no construtor. `menuInscricoes`
+  antigo removido (vive agora em VisaoInscricao). Telas de busca e lista
+  viraram públicas (`telaBuscaPorCodigoInscricao`, `telaListaCursosInscricao`)
+  para serem chamadas pela VisaoInscricao. O botão "Fazer minha inscrição" no
+  `telaDetalheCursoVisitante` agora chama `controleInscricao.inscrever` de
+  verdade e trata o retorno; se o usuário já está inscrito, o botão vira
+  "Cancelar minha inscrição". A opção "(A) Gerenciar inscritos" do menu Meus
+  Cursos delega para `VisaoInscricao.telaGerenciarInscritos`. O cancelamento
+  de curso avisa o número de inscritos e cancela todas as inscrições em cascata.
+  Adicionado setter `setVisaoInscricao` para quebrar a dependência circular.
+- **`ControleCurso.java`** — Recebe `ArquivoCursoUsuario` no construtor.
+  `excluirCurso` cancela inscrições do curso em cascata antes do delete.
+- **`ControleUsuario.java`** — Recebe `ArquivoCursoUsuario` no construtor.
+  `excluirUsuario` agora cancela inscrições do usuário em cursos de terceiros
+  e também as inscrições de terceiros nos cursos do usuário, antes do delete.
+- **`VisaoUsuario.java`** — Recebe `VisaoInscricao`. O case "C" do menu logado
+  roteia para `visaoInscricao.menuMinhasInscricoes` (em vez do antigo
+  `visaoCurso.menuInscricoes` que foi removido).
+- **`Principal.java`** — Instancia o novo `ArquivoCursoUsuario`, `ControleInscricao`,
+  `VisaoInscricao`. Faz o wire dos setters bidirecionais entre VisaoCurso e
+  VisaoInscricao. Fecha o novo arquivo no bloco finally.
+
+### 6. `TesteInscricaoNN.java` → `src/`
+
+29 verificações organizadas em 8 seções:
+1. Inscrição básica
+2. Regras de negócio (curso inexistente, fora do estado 0, dono no próprio,
+   inscrição dupla)
+3. Múltiplas inscrições N:N (consultas dos dois lados, ordenação)
+4. Cancelamento individual
+5. Cascata ao cancelar curso (remove inscrições)
+6. Cascata ao excluir conta (bloqueio com curso ativo, cascata quando inativo)
+7. Exportação CSV (header, escape de vírgula e aspas)
+8. Índices B+ consistentes após operações em cascata
+
+Resultado esperado: `29/29 testes passaram`. Combinado com o TesteRelacionamento1N
+(23/23) e o TesteBuscaCursos (20/20), o projeto tem **72 verificações
+automáticas** rodando verdes.
+
+---
+
+## Como funciona o N:N na prática
+
+O segredo está em reusar o `ParIdId` do prof (do TP1) para os dois novos
+índices, explorando o truque do coringa `-1` no `compareTo`:
+
+```java
+// Quando o aluno quer ver onde está inscrito:
+ArrayList<ParIdId> pares = indiceUsuarioInscricao.read(
+    new ParIdId(idUsuario, -1)  // "todas as inscrições do usuário X"
+);
+
+// Quando o dono quer ver quem está inscrito no curso:
+ArrayList<ParIdId> pares = indiceCursoInscricao.read(
+    new ParIdId(idCurso, -1)    // "todos os inscritos no curso Y"
+);
+```
+
+Em ambos os casos a Árvore B+ devolve todos os pares que compartilham o
+primeiro id (graças ao `compareTo` retornar 0 quando `id2 == -1`). A partir
+desse conjunto de `idCursoUsuario`, o `ArquivoCursoUsuario.read(id)` recupera
+cada entidade `CursoUsuario` com a `dataInscricao`. Em uma segunda passada, o
+`ControleInscricao` resolve os FKs em objetos `Curso` ou `Usuario`.
+
+E a integridade referencial é mantida garantindo que **toda remoção de Curso
+ou Usuario passe pelo Controle correspondente**, que cuida da cascata antes
+de chamar `Arquivo.delete`. Os dois índices B+ ficam automaticamente
+consistentes pelos overrides de `delete` no `ArquivoCursoUsuario`.
 

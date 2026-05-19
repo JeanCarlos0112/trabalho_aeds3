@@ -4,12 +4,14 @@ import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
+import entidades.inscricoes.ArquivoCursoUsuario;
 import entidades.usuarios.ArquivoUsuario;
 import entidades.usuarios.Usuario;
 
 public class ControleCurso {
     private ArquivoCurso arqCurso;
     private ArquivoUsuario arqUsuario;
+    private ArquivoCursoUsuario arqInscricao;
 
     // SecureRandom para gerar NanoIDs com qualidade criptografica
     // (recomendado pelo padrao NanoID, vs java.util.Random).
@@ -17,9 +19,12 @@ public class ControleCurso {
     private static final String ALFABETO_NANOID =
         "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-    public ControleCurso(ArquivoCurso arqCurso, ArquivoUsuario arqUsuario) throws Exception {
+    public ControleCurso(ArquivoCurso arqCurso,
+                         ArquivoUsuario arqUsuario,
+                         ArquivoCursoUsuario arqInscricao) throws Exception {
         this.arqCurso = arqCurso;
         this.arqUsuario = arqUsuario;
+        this.arqInscricao = arqInscricao;
     }
 
     /**
@@ -59,6 +64,11 @@ public class ControleCurso {
     }
 
     public boolean excluirCurso(int idCurso) throws Exception {
+        // Cascata: cancela todas as inscricoes naquele curso antes de
+        // remover o registro do curso, mantendo a integridade referencial
+        // do N:N (nao deixa "inscricoes orfas" apontando para um curso
+        // que nao existe mais).
+        arqInscricao.deleteAllByCurso(idCurso);
         return arqCurso.delete(idCurso);
     }
 

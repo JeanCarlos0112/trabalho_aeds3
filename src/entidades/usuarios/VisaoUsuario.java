@@ -3,6 +3,7 @@ package entidades.usuarios;
 import java.util.Scanner;
 
 import entidades.cursos.VisaoCurso;
+import entidades.inscricoes.VisaoInscricao;
 
 /**
  * Visão de Usuário — menu principal e telas de login/cadastro/meus dados.
@@ -24,12 +25,15 @@ import entidades.cursos.VisaoCurso;
 public class VisaoUsuario {
     private ControleUsuario controle;
     private VisaoCurso visaoCurso;
+    private VisaoInscricao visaoInscricao;
     private Scanner console;
     private Usuario usuarioLogado;
 
-    public VisaoUsuario(ControleUsuario controle, VisaoCurso visaoCurso, Scanner console) {
+    public VisaoUsuario(ControleUsuario controle, VisaoCurso visaoCurso,
+                        VisaoInscricao visaoInscricao, Scanner console) {
         this.controle = controle;
         this.visaoCurso = visaoCurso;
+        this.visaoInscricao = visaoInscricao;
         this.console = console;
         this.usuarioLogado = null;
     }
@@ -98,7 +102,7 @@ public class VisaoUsuario {
                 visaoCurso.menuCurso(usuarioLogado.getID());
                 return true;
             case "C":
-                visaoCurso.menuInscricoes(usuarioLogado.getID());
+                visaoInscricao.menuMinhasInscricoes(usuarioLogado.getID());
                 return true;
             case "S":
                 System.out.println("\nLogout realizado.");

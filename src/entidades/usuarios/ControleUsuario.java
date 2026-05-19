@@ -2,14 +2,19 @@ package entidades.usuarios;
 
 import java.util.ArrayList;
 import entidades.cursos.*;
+import entidades.inscricoes.ArquivoCursoUsuario;
 
 public class ControleUsuario {
     private ArquivoUsuario arqUsuario;
     private ArquivoCurso arqCurso;
+    private ArquivoCursoUsuario arqInscricao;
 
-    public ControleUsuario(ArquivoUsuario arqUsuario, ArquivoCurso arqCurso) throws Exception {
+    public ControleUsuario(ArquivoUsuario arqUsuario,
+                           ArquivoCurso arqCurso,
+                           ArquivoCursoUsuario arqInscricao) throws Exception {
         this.arqUsuario = arqUsuario;
         this.arqCurso = arqCurso;
+        this.arqInscricao = arqInscricao;
     }
 
     public boolean cadastrarUsuario(String nome, String email, int hashSenha, String perguntaSecreta, int hashRespostaSecreta) throws Exception {
@@ -62,13 +67,26 @@ public class ControleUsuario {
     public boolean excluirUsuario(int idUsuario) throws Exception {
         ArrayList<Curso> cursosDoUsuario = arqCurso.readAll(idUsuario);
 
+        // Mantem a regra do TP1: bloqueia exclusao se houver curso ativo
+        // (estado 0 ou 1). Cursos inativos (concluido / cancelado) sao
+        // removidos em cascata mais abaixo.
         for (Curso c : cursosDoUsuario) {
             if (c.getEstado() == 0 || c.getEstado() == 1) {
                 return false;
             }
         }
 
+        // Integridade do N:N - duas direcoes em cascata:
+        //   (1) inscricoes do USUARIO em cursos de OUTRAS pessoas
+        //       precisam sumir junto com a conta dele.
+        //   (2) inscricoes em cursos do PROPRIO usuario que serao
+        //       deletados a seguir tambem precisam ser canceladas
+        //       (cuida disso o controle: cada delete do curso cancela
+        //       suas inscricoes em cascata - mas como aqui apagamos
+        //       direto pelo arqCurso, fazemos manualmente).
+        arqInscricao.deleteAllByUsuario(idUsuario);
         for (Curso c : cursosDoUsuario) {
+            arqInscricao.deleteAllByCurso(c.getID());
             arqCurso.delete(c.getID());
         }
 

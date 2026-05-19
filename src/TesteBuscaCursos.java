@@ -2,6 +2,7 @@ import java.io.File;
 import java.util.ArrayList;
 import entidades.usuarios.*;
 import entidades.cursos.*;
+import entidades.inscricoes.*;
 
 /**
  * Teste da Busca de Cursos do TP2 (menu Minhas Inscricoes).
@@ -29,9 +30,10 @@ public class TesteBuscaCursos {
         try {
             limparDados();
 
-            ArquivoUsuario arqUsuario = new ArquivoUsuario();
-            ArquivoCurso   arqCurso   = new ArquivoCurso();
-            ControleCurso  ctrlCurso  = new ControleCurso(arqCurso, arqUsuario);
+            ArquivoUsuario      arqUsuario   = new ArquivoUsuario();
+            ArquivoCurso        arqCurso     = new ArquivoCurso();
+            ArquivoCursoUsuario arqInscricao = new ArquivoCursoUsuario();
+            ControleCurso  ctrlCurso  = new ControleCurso(arqCurso, arqUsuario, arqInscricao);
 
             // SETUP - usuarios
             printSecao("SETUP - Usuarios");
@@ -155,6 +157,7 @@ public class TesteBuscaCursos {
 
             arqCurso.close();
             arqUsuario.close();
+            arqInscricao.close();
 
             System.out.println("\n===========================================");
             System.out.println("  RESULTADO: " + ok + "/" + total + " testes passaram");
