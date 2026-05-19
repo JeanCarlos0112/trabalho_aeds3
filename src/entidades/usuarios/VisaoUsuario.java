@@ -98,7 +98,7 @@ public class VisaoUsuario {
                 visaoCurso.menuCurso(usuarioLogado.getID());
                 return true;
             case "C":
-                System.out.println("\n(Minhas inscricoes sera implementado no TP2.)");
+                visaoCurso.menuInscricoes(usuarioLogado.getID());
                 return true;
             case "S":
                 System.out.println("\nLogout realizado.");

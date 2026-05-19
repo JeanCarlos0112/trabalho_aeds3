@@ -13,7 +13,7 @@ public class Principal {
             arqCurso = new ArquivoCurso();
 
             ControleUsuario ctrlUsuario = new ControleUsuario(arqUsuario, arqCurso);
-            ControleCurso ctrlCurso = new ControleCurso(arqCurso);
+            ControleCurso ctrlCurso = new ControleCurso(arqCurso, arqUsuario);
 
             VisaoCurso visaoCurso = new VisaoCurso(ctrlCurso, console);
             VisaoUsuario visaoUsuario = new VisaoUsuario(ctrlUsuario, visaoCurso, console);

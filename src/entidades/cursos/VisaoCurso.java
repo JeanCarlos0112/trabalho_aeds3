@@ -4,6 +4,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import entidades.usuarios.Usuario;
+
 /**
  * Visão de Cursos — menu e telas de entrada/saída.
  *
@@ -261,6 +263,269 @@ public class VisaoCurso {
                 System.out.println("\nFalha ao atualizar.");
         } catch (Exception e) {
             System.out.println("Erro: " + e.getMessage());
+        }
+    }
+
+    // ============================================================
+    //  TP2 - Menu Minhas Inscricoes (busca de cursos)
+    // ============================================================
+
+    /**
+     * Menu "Minhas Inscricoes" - ponto de entrada da busca de cursos do TP2.
+     * Estrutura completa conforme especificacao:
+     *
+     *   INSCRICOES
+     *   (n) <lista dos cursos em que o usuario esta inscrito>
+     *
+     *   (A) Buscar curso por codigo
+     *   (B) Buscar curso por palavras-chave   [TP3]
+     *   (C) Listar todos os cursos
+     *   (R) Retornar ao menu anterior
+     *
+     * @param idUsuarioLogado - id do usuario ativo no sistema
+     */
+    public void menuInscricoes(int idUsuarioLogado) {
+        while (true) {
+            System.out.println("\nG12 TP1 1.2");
+            System.out.println("--------------");
+            System.out.println("> Inicio > Minhas Inscricoes\n");
+
+            System.out.println("INSCRICOES");
+            // A listagem das inscricoes propriamente ditas depende do
+            // relacionamento N:N (entidade CursoUsuario), que ainda nao
+            // foi implementado. Sera ligada ao Controle de Inscricao
+            // assim que o N:N estiver pronto.
+            System.out.println("(Nenhuma inscricao no momento.)");
+
+            System.out.println();
+            System.out.println("(A) Buscar curso por codigo");
+            System.out.println("(B) Buscar curso por palavras-chave");
+            System.out.println("(C) Listar todos os cursos");
+            System.out.println();
+            System.out.println("(R) Retornar ao menu anterior");
+            System.out.print("\nOpcao: ");
+
+            String op = console.nextLine().trim().toUpperCase();
+            switch (op) {
+                case "A":
+                    telaBuscaPorCodigo(idUsuarioLogado);
+                    break;
+                case "B":
+                    System.out.println("\n(Busca por palavras-chave sera implementada no TP3.)");
+                    break;
+                case "C":
+                    telaListaCursos(idUsuarioLogado);
+                    break;
+                case "R":
+                    return;
+                default:
+                    System.out.println("Opcao invalida.");
+            }
+        }
+    }
+
+    /**
+     * Busca curso por codigo NanoID. Pede o codigo ao usuario e,
+     * se encontrar, abre direto a tela de detalhe do curso.
+     * Conforme a especificacao: "Quando a busca for por codigo,
+     * a tela de lista nao precisa ser mostrada, apenas a tela [de detalhe]."
+     */
+    private void telaBuscaPorCodigo(int idUsuarioLogado) {
+        System.out.println("\nG12 TP1 1.2");
+        System.out.println("--------------");
+        System.out.println("> Inicio > Minhas Inscricoes > Buscar por codigo\n");
+
+        System.out.print("Digite o codigo do curso (10 caracteres): ");
+        String codigo = console.nextLine().trim();
+        if (codigo.isEmpty()) {
+            System.out.println("Codigo nao informado.");
+            return;
+        }
+
+        try {
+            Curso c = controle.buscarPorCodigo(codigo);
+            if (c == null) {
+                System.out.println("\nNenhum curso encontrado com o codigo '" + codigo + "'.");
+                return;
+            }
+            telaDetalheCursoVisitante(c.getID(), idUsuarioLogado, "Buscar por codigo");
+        } catch (Exception e) {
+            System.out.println("Erro na busca: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Lista paginada de todos os cursos disponiveis para inscricao
+     * (estado 0), ordenados por data de inicio crescente.
+     * 10 cursos por pagina, conforme a especificacao.
+     *
+     * Numeracao do menu segue o padrao do exemplo da spec:
+     *   (1) primeiro da pagina
+     *   (2) segundo
+     *   ...
+     *   (9) nono
+     *   (0) decimo
+     */
+    private void telaListaCursos(int idUsuarioLogado) {
+        ArrayList<Curso> cursos;
+        try {
+            cursos = controle.listarTodosCursosDisponiveis();
+        } catch (Exception e) {
+            System.out.println("Erro ao listar cursos: " + e.getMessage());
+            return;
+        }
+
+        if (cursos.isEmpty()) {
+            System.out.println("\n(Nenhum curso disponivel para inscricao no momento.)");
+            return;
+        }
+
+        final int PAGE_SIZE = 10;
+        int totalPaginas = (int) Math.ceil(cursos.size() / (double) PAGE_SIZE);
+        int paginaAtual = 1;
+
+        while (true) {
+            System.out.println("\nG12 TP1 1.2");
+            System.out.println("--------------");
+            System.out.println("> Inicio > Minhas Inscricoes > Lista de cursos\n");
+            System.out.println("Pagina " + paginaAtual + " de " + totalPaginas + "\n");
+
+            int inicio = (paginaAtual - 1) * PAGE_SIZE;
+            int fim = Math.min(inicio + PAGE_SIZE, cursos.size());
+
+            for (int i = inicio; i < fim; i++) {
+                Curso c = cursos.get(i);
+                int posicaoNaPagina = i - inicio + 1; // 1..10
+                String rotulo = (posicaoNaPagina == 10) ? "0" : String.valueOf(posicaoNaPagina);
+                System.out.println("(" + rotulo + ") " + c.getNome()
+                    + " - " + c.getDataInicio().format(FMT_DATA));
+            }
+
+            System.out.println();
+            if (paginaAtual > 1)             System.out.println("(A) Pagina anterior");
+            if (paginaAtual < totalPaginas)  System.out.println("(B) Proxima pagina");
+            System.out.println();
+            System.out.println("(R) Retornar ao menu anterior");
+            System.out.print("\nOpcao: ");
+
+            String opcao = console.nextLine().trim();
+            if (opcao.isEmpty()) continue;
+
+            if (opcao.equalsIgnoreCase("A")) {
+                if (paginaAtual > 1) paginaAtual--;
+                else System.out.println("Ja esta na primeira pagina.");
+            } else if (opcao.equalsIgnoreCase("B")) {
+                if (paginaAtual < totalPaginas) paginaAtual++;
+                else System.out.println("Ja esta na ultima pagina.");
+            } else if (opcao.equalsIgnoreCase("R")) {
+                return;
+            } else {
+                int num;
+                try {
+                    num = Integer.parseInt(opcao);
+                } catch (NumberFormatException e) {
+                    System.out.println("Opcao invalida.");
+                    continue;
+                }
+                // Mapeamento: 0 = 10o, 1..9 = 1o..9o
+                int indiceLocal;
+                if (num == 0) indiceLocal = 9;
+                else if (num >= 1 && num <= 9) indiceLocal = num - 1;
+                else {
+                    System.out.println("Numero fora do intervalo.");
+                    continue;
+                }
+                int indiceGlobal = inicio + indiceLocal;
+                if (indiceGlobal < fim) {
+                    telaDetalheCursoVisitante(cursos.get(indiceGlobal).getID(),
+                                              idUsuarioLogado,
+                                              "Lista de cursos");
+                } else {
+                    System.out.println("Esta posicao nao tem curso nesta pagina.");
+                }
+            }
+        }
+    }
+
+    /**
+     * Tela de detalhe de um curso visto por um possivel inscrito.
+     * Mostra CODIGO, CURSO, AUTOR, DESCRICAO e DATA DE INICIO.
+     * O botao "(A) Fazer minha inscricao" so aparece se o curso esta
+     * com estado 0 (recebendo inscricoes) e o visitante NAO e o dono
+     * do curso.
+     *
+     * @param idCurso - id do curso a exibir
+     * @param idUsuarioLogado - id do usuario que esta visualizando
+     * @param breadcrumbContexto - "Lista de cursos" ou "Buscar por codigo"
+     */
+    private void telaDetalheCursoVisitante(int idCurso, int idUsuarioLogado,
+                                           String breadcrumbContexto) {
+        while (true) {
+            Curso c;
+            Usuario autor;
+            try {
+                c = controle.buscarCurso(idCurso);
+                if (c == null) {
+                    System.out.println("Curso nao encontrado (pode ter sido removido).");
+                    return;
+                }
+                autor = controle.buscarAutor(c.getIdUsuario());
+            } catch (Exception e) {
+                System.out.println("Erro ao ler curso: " + e.getMessage());
+                return;
+            }
+
+            System.out.println("\nG12 TP1 1.2");
+            System.out.println("--------------");
+            System.out.println("> Inicio > Minhas Inscricoes > " + breadcrumbContexto
+                + " > " + c.getNome() + "\n");
+
+            System.out.println("CODIGO........: " + c.getCodigo());
+            System.out.println("CURSO.........: " + c.getNome());
+            System.out.println("AUTOR.........: "
+                + (autor != null ? autor.getNome() : "(autor removido)"));
+            System.out.println("DESCRICAO.....: " + c.getDescricao());
+            System.out.println("DATA DE INICIO: " + c.getDataInicio().format(FMT_DATA));
+
+            System.out.println();
+            boolean dono = (c.getIdUsuario() == idUsuarioLogado);
+            boolean inscricoesAbertas = (c.getEstado() == 0);
+
+            if (dono) {
+                System.out.println("(Voce e o autor deste curso. Gerencie-o em Meus Cursos.)");
+            } else if (!inscricoesAbertas) {
+                switch (c.getEstado()) {
+                    case 1: System.out.println("Este curso ja nao aceita novas inscricoes."); break;
+                    case 2: System.out.println("Este curso ja foi concluido."); break;
+                    case 3: System.out.println("Este curso foi cancelado.");      break;
+                }
+            }
+            System.out.println();
+
+            if (!dono && inscricoesAbertas) {
+                System.out.println("(A) Fazer minha inscricao no curso");
+            }
+            System.out.println("(R) Retornar ao menu anterior");
+            System.out.print("\nOpcao: ");
+
+            String op = console.nextLine().trim().toUpperCase();
+            switch (op) {
+                case "A":
+                    if (!dono && inscricoesAbertas) {
+                        // Placeholder: a efetivacao da inscricao depende do
+                        // relacionamento N:N (entidade CursoUsuario), proxima
+                        // tarefa do TP2. Sera ligada ao Controle de Inscricao.
+                        System.out.println("\n(Efetivacao da inscricao sera implementada "
+                            + "junto com o relacionamento N:N.)");
+                    } else {
+                        System.out.println("Opcao invalida.");
+                    }
+                    break;
+                case "R":
+                    return;
+                default:
+                    System.out.println("Opcao invalida.");
+            }
         }
     }
 }
