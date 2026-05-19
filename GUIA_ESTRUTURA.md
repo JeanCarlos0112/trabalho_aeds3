@@ -221,7 +221,7 @@ public int cadastrarCurso(int idUsuario, String nome, String descricao) throws E
 
 ---
 
-## O que o **ANDRÉ + JEAN** entregou (TP2 — Busca de Cursos)
+## O que o **MIRO + JEAN** entregou (TP2 — Busca de Cursos)
 
 A Busca de Cursos é a pré-condição para o relacionamento N:N (entidade
 `CursoUsuario`) e o CRUD de Inscrições, que serão implementados na próxima
