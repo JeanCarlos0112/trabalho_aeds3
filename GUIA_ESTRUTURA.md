@@ -443,7 +443,7 @@ consistentes pelos overrides de `delete` no `ArquivoCursoUsuario`.
 
 ---
 
-## O que o **JEAN** entregou (TP2 — Gerenciamento das próprias inscrições)
+## O que o **LUIZ** entregou (TP2 — Gerenciamento das próprias inscrições)
 
 Esta etapa é a interface do **aluno**: o usuário entra em "Minhas
 Inscrições" pelo menu logado e tem acesso à lista das inscrições atuais
@@ -504,7 +504,7 @@ individual.
 
 ---
 
-## O que o **JEAN** entregou (TP2 — Visão dos inscritos nos seus cursos)
+## O que o **ANDRÉ** entregou (TP2 — Visão dos inscritos nos seus cursos)
 
 Esta etapa é a interface do **dono do curso**: a partir do menu Meus
 Cursos, ao escolher um curso, a opção "(A) Gerenciar inscritos no curso"
