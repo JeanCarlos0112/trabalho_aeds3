@@ -1,4 +1,4 @@
-### [2026-05-19] — JEAN — TP2: Visão dos inscritos nos seus cursos
+### [2026-05-19] — ANDRÉ — TP2: Visão dos inscritos nos seus cursos
 #### Arquivos criados:
 
 - entidades/inscricoes/VisaoInscricao.java (parte 1/2) — Tela `telaGerenciarInscritos(Curso)` acessada de Meus Cursos > curso > "(A) Gerenciar inscritos no curso". Lista numerada dos inscritos no curso com nome + data de inscrição, em ordem alfabética. Tela `telaDetalheInscrito(curso, ui)` aberta ao selecionar pelo número: exibe NOME, EMAIL, INSCRITO EM, e oferece botão "(A) Cancelar a inscricao deste aluno" com confirmação S/N. Método `exportarLista(curso)` gera arquivo CSV em `./exportacoes/inscritos_<codigo>.csv`.
@@ -13,7 +13,7 @@
 - TesteInscricaoNN — seção 7: 4 verificações sobre CSV (cabeçalho correto, escape de vírgula em `"Dan, Junior"`, escape de aspas em `"dan@""x"""`, presença de ambos os inscritos).
 
 
-### [2026-05-19] — JEAN — TP2: Gerenciamento das próprias inscrições
+### [2026-05-19] — LUIZ — TP2: Gerenciamento das próprias inscrições
 #### Arquivos criados:
 
 - entidades/inscricoes/VisaoInscricao.java (parte 2/2) — Método `menuMinhasInscricoes(idUsuarioLogado)`: ponto de entrada do menu Minhas Inscrições (acessado do menu logado via opção C). Lista no topo as inscrições atuais do usuário (numeradas), com sufixo de estado do curso quando aplicável: `(INSCRICOES ENCERRADAS)`, `(CURSO CONCLUIDO)`, `(CURSO CANCELADO)`. Oferece as três opções de busca (A/B/C) delegando para VisaoCurso. Digitar o número de uma inscrição abre `telaDetalheMinhaInscricao(idCursoUsuario, idUsuarioLogado)` que exibe CODIGO, CURSO, AUTOR, DESCRICAO, DATA DE INICIO, INSCRITO EM e oferece botão "(A) Cancelar minha inscricao no curso" com confirmação.
