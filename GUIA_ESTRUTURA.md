@@ -358,9 +358,9 @@ O fluxo completo do menu Minhas Inscrições, da busca até a tela de detalhe:
 
 ## O que o **JEAN** entregou (TP2 — Relacionamento N:N)
 
-Esta etapa completa o TP2 implementando a entidade de associação `CursoUsuario`,
-as duas Árvores B+ que sustentam o relacionamento N:N, todas as visões de
-inscrição e a integridade referencial em cascata.
+Esta etapa cria a entidade de associação `CursoUsuario`, as duas Árvores
+B+ que sustentam o relacionamento N:N e a integridade referencial em
+cascata que garante que nenhuma inscrição órfã possa existir.
 
 ### 1. `CursoUsuario.java` → `entidades/inscricoes/`
 
@@ -379,6 +379,10 @@ sincronizadas em `create`, `delete` e `update`:
 - **`indiceUsuarioInscricao`** — `ParIdId(idUsuario, idCursoUsuario)`
   Permite recuperar todas as inscrições de um usuário (lado aluno).
 
+Duas Árvores B+ separadas (em vez de uma só) porque o N:N precisa ser
+navegável a partir de qualquer um dos dois lados, e uma estrutura B+ admite
+apenas um critério de ordenação por vez — exatamente o que a spec pede.
+
 Métodos públicos novos:
 
 | Método                                    | O que faz                                                |
@@ -390,87 +394,22 @@ Métodos públicos novos:
 | `deleteAllByCurso(int idCurso)`           | Cascata: remove todas as inscrições daquele curso        |
 | `deleteAllByUsuario(int idUsuario)`       | Cascata: remove todas as inscrições daquele usuário      |
 
-### 3. `ControleInscricao.java` → `entidades/inscricoes/`
+### 3. Integridade referencial em cascata
 
-Orquestra `ArquivoCursoUsuario` com `ArquivoCurso` e `ArquivoUsuario`.
-
-Regras de negócio validadas no `inscrever`, devolvidas como códigos de status
-(para a Visão renderizar a mensagem certa sem precisar capturar exceptions):
-
-| Código                              | Significado                                            |
-|-------------------------------------|--------------------------------------------------------|
-| `OK_INSCRITO`                       | Inscrição efetivada com sucesso                        |
-| `ERRO_CURSO_INEXISTENTE`            | idCurso não existe                                     |
-| `ERRO_CURSO_NAO_DISPONIVEL`         | Curso não está no estado 0 (não recebe inscrições)     |
-| `ERRO_DONO_INSCREVENDO_NO_PROPRIO`  | Dono tentando se inscrever no próprio curso            |
-| `ERRO_JA_INSCRITO`                  | Usuário já está inscrito neste curso                   |
-
-Outros métodos: `cancelarInscricao`, `cancelarInscricaoCursoUsuario`,
-`estaInscrito`, `listarMinhasInscricoes` (lado aluno, ordenado por data),
-`listarInscritos` (lado dono, ordem alfabética), `contarInscritos`, e
-`exportarCSV` (com escape RFC 4180 para vírgulas, aspas e quebras de linha).
-
-### 4. `VisaoInscricao.java` → `entidades/inscricoes/`
-
-Quatro telas conforme a especificação:
-
-- **`menuMinhasInscricoes(int idUsuarioLogado)`** — ponto de entrada do menu
-  Minhas Inscrições. Lista as inscrições atuais do usuário no topo
-  (numeradas) com sufixo de estado do curso quando aplicável: `(INSCRICOES
-  ENCERRADAS)`, `(CURSO CONCLUIDO)`, `(CURSO CANCELADO)`. Delega as três
-  opções de busca para VisaoCurso. Digitar o número de uma inscrição abre
-  o detalhe correspondente.
-- **`telaDetalheMinhaInscricao`** — exibe CÓDIGO, CURSO, AUTOR, DESCRIÇÃO,
-  DATA DE INÍCIO, INSCRITO EM e STATUS (se diferente do estado 0), com
-  botão "(A) Cancelar minha inscrição".
-- **`telaGerenciarInscritos(Curso curso)`** — acessada de Meus Cursos > curso
-  > "(A) Gerenciar inscritos". Lista numerada dos inscritos com nome + data,
-  botão "(A) Exportar lista" (gera CSV em `./exportacoes/inscritos_<codigo>.csv`)
-  e selecionar um inscrito abre o detalhe dele.
-- **`telaDetalheInscrito`** — exibe NOME, EMAIL e DATA DE INSCRIÇÃO do aluno
-  para o dono do curso, com opção de cancelar a inscrição daquele aluno
-  específico.
-
-### 5. Alterações em arquivos existentes
-
-- **`VisaoCurso.java`** — Recebe `ControleInscricao` no construtor. `menuInscricoes`
-  antigo removido (vive agora em VisaoInscricao). Telas de busca e lista
-  viraram públicas (`telaBuscaPorCodigoInscricao`, `telaListaCursosInscricao`)
-  para serem chamadas pela VisaoInscricao. O botão "Fazer minha inscrição" no
-  `telaDetalheCursoVisitante` agora chama `controleInscricao.inscrever` de
-  verdade e trata o retorno; se o usuário já está inscrito, o botão vira
-  "Cancelar minha inscrição". A opção "(A) Gerenciar inscritos" do menu Meus
-  Cursos delega para `VisaoInscricao.telaGerenciarInscritos`. O cancelamento
-  de curso avisa o número de inscritos e cancela todas as inscrições em cascata.
-  Adicionado setter `setVisaoInscricao` para quebrar a dependência circular.
 - **`ControleCurso.java`** — Recebe `ArquivoCursoUsuario` no construtor.
   `excluirCurso` cancela inscrições do curso em cascata antes do delete.
 - **`ControleUsuario.java`** — Recebe `ArquivoCursoUsuario` no construtor.
   `excluirUsuario` agora cancela inscrições do usuário em cursos de terceiros
   e também as inscrições de terceiros nos cursos do usuário, antes do delete.
-- **`VisaoUsuario.java`** — Recebe `VisaoInscricao`. O case "C" do menu logado
-  roteia para `visaoInscricao.menuMinhasInscricoes` (em vez do antigo
-  `visaoCurso.menuInscricoes` que foi removido).
-- **`Principal.java`** — Instancia o novo `ArquivoCursoUsuario`, `ControleInscricao`,
-  `VisaoInscricao`. Faz o wire dos setters bidirecionais entre VisaoCurso e
-  VisaoInscricao. Fecha o novo arquivo no bloco finally.
+- **`Principal.java`** — Instancia o novo `ArquivoCursoUsuario` e fecha-o
+  no bloco finally junto com os outros arquivos.
 
-### 6. `TesteInscricaoNN.java` → `src/`
+### 4. `TesteInscricaoNN.java` → `src/` (parte 1/3 — N:N)
 
-29 verificações organizadas em 8 seções:
-1. Inscrição básica
-2. Regras de negócio (curso inexistente, fora do estado 0, dono no próprio,
-   inscrição dupla)
-3. Múltiplas inscrições N:N (consultas dos dois lados, ordenação)
-4. Cancelamento individual
-5. Cascata ao cancelar curso (remove inscrições)
-6. Cascata ao excluir conta (bloqueio com curso ativo, cascata quando inativo)
-7. Exportação CSV (header, escape de vírgula e aspas)
-8. Índices B+ consistentes após operações em cascata
-
-Resultado esperado: `29/29 testes passaram`. Combinado com o TesteRelacionamento1N
-(23/23) e o TesteBuscaCursos (20/20), o projeto tem **72 verificações
-automáticas** rodando verdes.
+Seções 1, 3, 5, 6 e 8 cobrem a infraestrutura do N:N: inscrição básica,
+múltiplas inscrições N:N (consultas dos dois lados, ordenação), cascata ao
+cancelar curso, cascata ao excluir conta, e consistência dos índices B+
+após cascata.
 
 ---
 
@@ -501,4 +440,133 @@ E a integridade referencial é mantida garantindo que **toda remoção de Curso
 ou Usuario passe pelo Controle correspondente**, que cuida da cascata antes
 de chamar `Arquivo.delete`. Os dois índices B+ ficam automaticamente
 consistentes pelos overrides de `delete` no `ArquivoCursoUsuario`.
+
+---
+
+## O que o **JEAN** entregou (TP2 — Gerenciamento das próprias inscrições)
+
+Esta etapa é a interface do **aluno**: o usuário entra em "Minhas
+Inscrições" pelo menu logado e tem acesso à lista das inscrições atuais
+dele, à busca de cursos novos para se inscrever e ao cancelamento das
+inscrições existentes.
+
+### 1. `ControleInscricao.java` (parte 1/2) → `entidades/inscricoes/`
+
+Validação de regras de negócio no método `inscrever`, devolvidas como
+códigos de status (para a Visão renderizar a mensagem certa sem precisar
+capturar exceptions):
+
+| Código                              | Significado                                            |
+|-------------------------------------|--------------------------------------------------------|
+| `OK_INSCRITO`                       | Inscrição efetivada com sucesso                        |
+| `ERRO_CURSO_INEXISTENTE`            | idCurso não existe                                     |
+| `ERRO_CURSO_NAO_DISPONIVEL`         | Curso não está no estado 0 (não recebe inscrições)     |
+| `ERRO_DONO_INSCREVENDO_NO_PROPRIO`  | Dono tentando se inscrever no próprio curso            |
+| `ERRO_JA_INSCRITO`                  | Usuário já está inscrito neste curso                   |
+
+Outros métodos desta etapa: `cancelarInscricao`,
+`cancelarInscricaoCursoUsuario`, `estaInscrito`, `listarMinhasInscricoes`
+(ordenado por data de início do curso).
+
+### 2. `VisaoInscricao.java` (parte 1/2) → `entidades/inscricoes/`
+
+Duas telas do lado do aluno:
+
+- **`menuMinhasInscricoes(int idUsuarioLogado)`** — ponto de entrada do
+  menu Minhas Inscrições. Lista as inscrições atuais do usuário no topo
+  (numeradas) com sufixo de estado do curso quando aplicável:
+  `(INSCRICOES ENCERRADAS)`, `(CURSO CONCLUIDO)`, `(CURSO CANCELADO)`.
+  Delega as três opções de busca para VisaoCurso. Digitar o número de
+  uma inscrição abre o detalhe correspondente.
+- **`telaDetalheMinhaInscricao`** — exibe CODIGO, CURSO, AUTOR, DESCRICAO,
+  DATA DE INICIO, INSCRITO EM e STATUS (se diferente do estado 0), com
+  botão "(A) Cancelar minha inscricao no curso" e confirmação S/N.
+
+### 3. Botão contextual na tela do visitante (`VisaoCurso.java`)
+
+`telaDetalheCursoVisitante` consulta `controleInscricao.estaInscrito` ao
+abrir e renderiza o botão correto: "(A) Fazer minha inscricao no curso"
+se o curso está no estado 0 e o usuário não é o dono nem está inscrito;
+"(A) Cancelar minha inscricao no curso" se o usuário já está inscrito;
+nenhum botão de ação se é o dono do curso ou se as inscrições estão
+fechadas. Trata todos os códigos de status retornados pelo `inscrever`.
+
+### 4. Wire no `VisaoUsuario.java`
+
+Construtor recebe `VisaoInscricao`. O case "C" do menu logado roteia para
+`visaoInscricao.menuMinhasInscricoes(usuarioLogado.getID())`.
+
+### 5. `TesteInscricaoNN.java` (parte 2/3 — Gerenciamento próprias)
+
+Seções 2 e 4 cobrem regras de negócio na inscrição (curso inexistente,
+fora do estado 0, dono no próprio, inscrição dupla) e cancelamento
+individual.
+
+---
+
+## O que o **JEAN** entregou (TP2 — Visão dos inscritos nos seus cursos)
+
+Esta etapa é a interface do **dono do curso**: a partir do menu Meus
+Cursos, ao escolher um curso, a opção "(A) Gerenciar inscritos no curso"
+abre uma lista numerada dos inscritos com data de inscrição e permite ver
+detalhes individuais, cancelar inscrições específicas ou exportar a lista
+em CSV.
+
+### 1. `ControleInscricao.java` (parte 2/2) → `entidades/inscricoes/`
+
+Métodos do lado do dono:
+
+| Método                                 | O que faz                                          |
+|----------------------------------------|----------------------------------------------------|
+| `listarInscritos(int idCurso)`         | Inscritos em ordem alfabética por nome do aluno    |
+| `contarInscritos(int idCurso)`         | Contagem usada por VisaoCurso ao cancelar o curso  |
+| `exportarCSV(int idCurso)`             | CSV com cabeçalho e escape RFC 4180                |
+
+`exportarCSV` gera saída no formato:
+
+```
+Nome,Email,DataInscricao
+Carlos Lana Freitas,carlos@x.com,2026-01-15
+"Dan, Junior","dan@""empresa"".com",2026-01-18
+```
+
+Campos com vírgula, aspas duplas ou quebras de linha recebem aspas
+duplas ao redor; aspas internas são escapadas duplicando-as, conforme RFC 4180.
+
+### 2. `VisaoInscricao.java` (parte 2/2) → `entidades/inscricoes/`
+
+Duas telas do lado do dono:
+
+- **`telaGerenciarInscritos(Curso curso)`** — acessada de Meus Cursos >
+  curso > "(A) Gerenciar inscritos no curso". Lista numerada dos inscritos
+  com `nome (data)`, botão "(A) Exportar lista" (gera CSV em
+  `./exportacoes/inscritos_<codigo>.csv` e informa o caminho) e selecionar
+  pelo número abre o detalhe do inscrito.
+- **`telaDetalheInscrito(curso, ui)`** — exibe NOME, EMAIL e INSCRITO EM
+  do aluno (visão do dono), com botão "(A) Cancelar a inscricao deste
+  aluno" e confirmação S/N.
+
+### 3. Alterações em `VisaoCurso.java` (telas do dono)
+
+- `telaDetalheCurso` (visão do dono): o case "A" (Gerenciar inscritos no
+  curso) agora delega para `visaoInscricao.telaGerenciarInscritos(curso)`
+  em vez de mostrar placeholder.
+- `telaDetalheCurso` case "E" (Cancelar curso): consulta
+  `controleInscricao.contarInscritos` antes da confirmação e avisa
+  quantos inscritos serão atingidos pela cascata, antes de chamar o
+  `controle.excluirCurso` que já cuida da cascata via ControleCurso.
+
+### 4. `TesteInscricaoNN.java` (parte 3/3 — Visão inscritos)
+
+Seção 7 cobre a exportação CSV: cabeçalho correto, escape de vírgula em
+`"Dan, Junior"`, escape de aspas em `"dan@""x"""`, e presença de ambos os
+inscritos na saída.
+
+---
+
+**Resumo da bateria de testes (após o TP2 completo)**: o `TesteInscricaoNN`
+roda 29 verificações organizadas em 8 seções cobrindo os três módulos do
+N:N acima. Combinado com o `TesteRelacionamento1N` (23/23) e o
+`TesteBuscaCursos` (20/20), o projeto tem **72 verificações automáticas**
+rodando verdes.
 

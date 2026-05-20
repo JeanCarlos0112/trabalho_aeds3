@@ -41,15 +41,27 @@ O arquivo contempla uma especie de guia para a estrutura de pastas que o **MIRO*
 
 ### TP2 — completo:
 
+#### Busca de cursos
 - [x] Implementar a busca de cursos por código NanoID (índice Hash Extensível indiceCodigoCurso). (Responsabilidade: **JEAN**)
 - [x] Implementar a lista paginada de todos os cursos disponíveis (10 por página, ordenada por data de início). (Responsabilidade: **JEAN**)
-- [x] Implementar o menu Minhas Inscrições com as opções de busca. (Responsabilidade: **JEAN**)
+- [x] Implementar o menu Minhas Inscrições com as três opções de busca (código, palavras-chave, listar todos). (Responsabilidade: **JEAN**)
+
+#### Relacionamento N:N
 - [x] Implementar o relacionamento N:N entre Cursos e Usuários usando a entidade de associação CursoUsuario e duas Árvores B+. (Responsabilidade: **JEAN**)
 - [x] Implementar o CRUD de Inscrições (entidade CursoUsuario). (Responsabilidade: **JEAN**)
-- [x] Criar a visão e o controle de inscrições, incluindo a efetivação do botão "Fazer minha inscrição". (Responsabilidade: **JEAN**)
-- [x] Implementar a gestão de inscritos pelo proponente do curso (menu Meus Cursos → Gerenciar inscritos), com exportação em CSV. (Responsabilidade: **JEAN**)
-- [x] Implementar o cancelamento de inscrição pelo aluno. (Responsabilidade: **JEAN**)
 - [x] Assegurar a integridade de dados entre todas as entidades nas operações de cancelamento de curso e exclusão de conta. (Responsabilidade: **JEAN**)
+
+#### Gerenciamento das próprias inscrições
+- [x] Criar a visão e o controle de inscrições, incluindo a efetivação do botão "Fazer minha inscrição". (Responsabilidade: **JEAN**)
+- [x] Implementar a listagem das inscrições atuais do usuário no topo do menu Minhas Inscrições, com tag de estado do curso. (Responsabilidade: **JEAN**)
+- [x] Implementar o cancelamento de inscrição pelo aluno (tela de detalhe da inscrição). (Responsabilidade: **JEAN**)
+
+#### Visão dos inscritos nos seus cursos
+- [x] Implementar a gestão de inscritos pelo proponente do curso (menu Meus Cursos → Gerenciar inscritos). (Responsabilidade: **JEAN**)
+- [x] Implementar a exportação da lista de inscritos em formato CSV com escape RFC 4180. (Responsabilidade: **JEAN**)
+- [x] Implementar o cancelamento individual de inscrição pelo dono do curso (tela de detalhe do inscrito). (Responsabilidade: **JEAN**)
+
+#### Documentação e fechamento
 - [x] Preencher checklist do relatório do TP2 no README.md. (Responsabilidade: **JEAN**)
 - [ ] Gravar novo vídeo de demonstração do TP2 (até 3 minutos).
 - [ ] Busca por palavras-chave (reservado para o TP3).

@@ -1,18 +1,47 @@
+### [2026-05-19] — JEAN — TP2: Visão dos inscritos nos seus cursos
+#### Arquivos criados:
+
+- entidades/inscricoes/VisaoInscricao.java (parte 1/2) — Tela `telaGerenciarInscritos(Curso)` acessada de Meus Cursos > curso > "(A) Gerenciar inscritos no curso". Lista numerada dos inscritos no curso com nome + data de inscrição, em ordem alfabética. Tela `telaDetalheInscrito(curso, ui)` aberta ao selecionar pelo número: exibe NOME, EMAIL, INSCRITO EM, e oferece botão "(A) Cancelar a inscricao deste aluno" com confirmação S/N. Método `exportarLista(curso)` gera arquivo CSV em `./exportacoes/inscritos_<codigo>.csv`.
+
+#### Arquivos modificados:
+
+- entidades/inscricoes/ControleInscricao.java (parte 1/3) — Métodos `listarInscritos(idCurso)` (retorna UsuarioComInscricao[], ordem alfabética por nome do aluno), `contarInscritos(idCurso)`, `exportarCSV(idCurso)` (cabeçalho Nome,Email,DataInscricao com escape RFC 4180 para vírgulas, aspas duplas e quebras de linha). Estrutura auxiliar `UsuarioComInscricao` para emparelhar objetos sem fazer lookups extras na View.
+- entidades/cursos/VisaoCurso.java (parte 1/3) — `telaDetalheCurso` (visão do dono): o case "A" (Gerenciar inscritos no curso) agora delega para `visaoInscricao.telaGerenciarInscritos(curso)` em vez de mostrar placeholder. O case "E" (Cancelar curso) consulta `controleInscricao.contarInscritos(idCurso)` antes da confirmação e avisa o número de inscritos que serão atingidos pela cascata.
+
+#### Observações:
+
+- TesteInscricaoNN — seção 7: 4 verificações sobre CSV (cabeçalho correto, escape de vírgula em `"Dan, Junior"`, escape de aspas em `"dan@""x"""`, presença de ambos os inscritos).
+
+
+### [2026-05-19] — JEAN — TP2: Gerenciamento das próprias inscrições
+#### Arquivos criados:
+
+- entidades/inscricoes/VisaoInscricao.java (parte 2/2) — Método `menuMinhasInscricoes(idUsuarioLogado)`: ponto de entrada do menu Minhas Inscrições (acessado do menu logado via opção C). Lista no topo as inscrições atuais do usuário (numeradas), com sufixo de estado do curso quando aplicável: `(INSCRICOES ENCERRADAS)`, `(CURSO CONCLUIDO)`, `(CURSO CANCELADO)`. Oferece as três opções de busca (A/B/C) delegando para VisaoCurso. Digitar o número de uma inscrição abre `telaDetalheMinhaInscricao(idCursoUsuario, idUsuarioLogado)` que exibe CODIGO, CURSO, AUTOR, DESCRICAO, DATA DE INICIO, INSCRITO EM e oferece botão "(A) Cancelar minha inscricao no curso" com confirmação.
+
+#### Arquivos modificados:
+
+- entidades/inscricoes/ControleInscricao.java (parte 2/3) — Método `inscrever(idCurso, idUsuario)` com validação em ordem (curso existe, estado 0, dono não se inscreve no próprio, sem duplicação) e códigos de status (`OK_INSCRITO`, `ERRO_CURSO_INEXISTENTE`, `ERRO_CURSO_NAO_DISPONIVEL`, `ERRO_DONO_INSCREVENDO_NO_PROPRIO`, `ERRO_JA_INSCRITO`). Métodos `cancelarInscricao(idCursoUsuario)`, `cancelarInscricaoCursoUsuario(idCurso, idUsuario)`, `estaInscrito(idCurso, idUsuario)` e `listarMinhasInscricoes(idUsuario)` (retorna CursoComInscricao[] ordenado por data de início).
+- entidades/cursos/VisaoCurso.java (parte 2/3) — `telaDetalheCursoVisitante` agora consulta `controleInscricao.estaInscrito` ao abrir e renderiza o botão correto: "(A) Fazer minha inscricao" se o curso está no estado 0 e o usuário não é o dono nem está inscrito; "(A) Cancelar minha inscricao" se o usuário já está inscrito; nenhum botão de ação se é o dono ou o curso não está mais aceitando inscrições. Trata todos os códigos de status retornados pelo `inscrever`.
+- entidades/usuarios/VisaoUsuario.java — Construtor recebe `VisaoInscricao`. O case "C" do menu logado roteia para `visaoInscricao.menuMinhasInscricoes(usuarioLogado.getID())`.
+
+#### Observações:
+
+- TesteInscricaoNN — seções 1, 2 e 4: 11 verificações sobre inscrição básica, regras de negócio (curso inexistente, fora do estado 0, auto-inscrição, duplicação) e cancelamento individual.
+
+
 ### [2026-05-19] — JEAN — TP2: Relacionamento N:N (entidade CursoUsuario)
 #### Arquivos criados:
 
 - entidades/inscricoes/CursoUsuario.java — Entidade de associação do relacionamento N:N entre Curso e Usuário. Atributos: id, idCurso, idUsuario, dataInscricao. Serialização via DataOutputStream com data armazenada como long (epochDay), totalizando 20 bytes fixos.
-- entidades/inscricoes/ArquivoCursoUsuario.java — CRUD da entidade com **duas Árvores B+** mantidas sincronizadas em create/delete/update: `indiceCursoInscricao` (ParIdId(idCurso, idCursoUsuario)) e `indiceUsuarioInscricao` (ParIdId(idUsuario, idCursoUsuario)). Métodos de consulta: readByCurso, readByUsuario, existeInscricao, buscarIdInscricao. Métodos de cascata: deleteAllByCurso, deleteAllByUsuario.
-- entidades/inscricoes/ControleInscricao.java — Orquestra ArquivoCursoUsuario com ArquivoCurso e ArquivoUsuario. Regras de negócio na inscrição (com códigos de status): curso inexistente, curso fora do estado 0, dono se inscrevendo no próprio, inscrição dupla. Métodos: inscrever, cancelarInscricao (por id), cancelarInscricaoCursoUsuario (por par), estaInscrito, listarMinhasInscricoes, listarInscritos, exportarCSV, contarInscritos.
-- entidades/inscricoes/VisaoInscricao.java — Quatro telas conforme a especificação: menuMinhasInscricoes (lista as inscrições do usuário no topo com indicação de estado do curso), telaDetalheMinhaInscricao (visão do aluno, botão de cancelar), telaGerenciarInscritos (visão do dono, lista numerada com nome + data, opção de exportar CSV), telaDetalheInscrito (dados do inscrito + cancelar inscrição dele).
-- TesteInscricaoNN.java — 29 verificações cobrindo CRUD, sincronização dos dois índices B+, regras de negócio, integridade referencial em cascata (cancelar curso → inscrições, excluir conta → inscrições), exportação CSV com escape de vírgulas e aspas.
+- entidades/inscricoes/ArquivoCursoUsuario.java — CRUD da entidade com **duas Árvores B+** mantidas sincronizadas em create/delete/update: `indiceCursoInscricao` (ParIdId(idCurso, idCursoUsuario)) e `indiceUsuarioInscricao` (ParIdId(idUsuario, idCursoUsuario)). Métodos de consulta: `readByCurso`, `readByUsuario`, `existeInscricao`, `buscarIdInscricao`. Métodos de cascata: `deleteAllByCurso`, `deleteAllByUsuario`.
+- TesteInscricaoNN.java — 29 verificações em 8 seções cobrindo CRUD, sincronização dos dois índices B+, regras de negócio, integridade referencial em cascata (cancelar curso → inscrições, excluir conta → inscrições), exportação CSV com escape RFC 4180, e consistência dos índices B+ após cascata.
 
 #### Arquivos modificados:
 
-- entidades/cursos/VisaoCurso.java — Construtor passa a receber ControleInscricao. menuInscricoes antigo removido (vive agora em VisaoInscricao). Métodos telaBuscaPorCodigo e telaListaCursos virou público com sufixo Inscricao para serem chamados por VisaoInscricao. Botão "Fazer minha inscrição" no telaDetalheCursoVisitante agora chama controleInscricao.inscrever de verdade, mostra "Cancelar minha inscrição" se o usuário já está inscrito. Método "(A) Gerenciar inscritos no curso" do menu Meus Cursos delega para VisaoInscricao. Cancelamento de curso aviso o número de inscritos antes e cancela em cascata via ControleCurso. Setter setVisaoInscricao para quebrar dependência circular com VisaoInscricao.
-- entidades/cursos/ControleCurso.java — Recebe ArquivoCursoUsuario no construtor. excluirCurso agora cancela inscrições do curso em cascata antes de remover o registro.
-- entidades/usuarios/ControleUsuario.java — Recebe ArquivoCursoUsuario no construtor. excluirUsuario agora cancela inscrições do usuário em cascata (duas direções: inscrições dele em cursos de outros + inscrições em cursos dele que serão deletados).
-- entidades/usuarios/VisaoUsuario.java — Recebe VisaoInscricao no construtor. case "C" do menu logado roteia para visaoInscricao.menuMinhasInscricoes em vez do método antigo em VisaoCurso.
+- entidades/inscricoes/ControleInscricao.java (parte 3/3) — Esqueleto do controlador: construtor recebe ArquivoCursoUsuario + ArquivoCurso + ArquivoUsuario, e as estruturas auxiliares `CursoComInscricao` / `UsuarioComInscricao` usadas pelas visões.
+- entidades/cursos/VisaoCurso.java (parte 3/3) — Construtor passa a receber ControleInscricao. Setter `setVisaoInscricao` para quebrar dependência circular com VisaoInscricao.
+- entidades/cursos/ControleCurso.java — Recebe ArquivoCursoUsuario no construtor. `excluirCurso` agora cancela inscrições do curso em cascata antes de remover o registro (integridade referencial: nenhuma inscrição órfã apontando para curso inexistente).
+- entidades/usuarios/ControleUsuario.java — Recebe ArquivoCursoUsuario no construtor. `excluirUsuario` agora cancela inscrições do usuário em cascata (duas direções: inscrições do usuário em cursos de terceiros + inscrições de terceiros nos cursos do usuário que serão deletados).
 - Principal.java — Instancia ArquivoCursoUsuario, ControleInscricao e VisaoInscricao. Faz o wire dos setters bidirecionais entre VisaoCurso e VisaoInscricao. Fecha o novo arquivo no bloco finally.
 - TesteBuscaCursos.java — Ajustado para o novo construtor de ControleCurso e fechamento do arqInscricao.
 

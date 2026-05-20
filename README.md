@@ -40,21 +40,40 @@ A classe de entrada é Principal, que abre os arquivos, instancia os controles/v
 6. Minhas inscrições: lista no topo as inscrições atuais do usuário (com indicação de estado do curso quando aplicável: INSCRIÇÕES ENCERRADAS, CURSO CONCLUÍDO, CURSO CANCELADO); digitar o número da inscrição abre o detalhe com opção de cancelar. Três opções de busca: (A) por código NanoID, que abre direto a tela de detalhe; (B) por palavras-chave (reservado para o TP3); (C) listagem paginada de todos os cursos disponíveis (10 por página, ordenados por data de início). A tela de detalhe do curso visitado exibe CÓDIGO, CURSO, AUTOR, DESCRIÇÃO e DATA DE INÍCIO e, conforme o caso, oferece o botão "(A) Fazer minha inscrição" (curso em estado 0, visitante não é o dono e não está inscrito) ou "(A) Cancelar minha inscrição" (já inscrito).
 
 ### Operações especiais
+
+#### TP1
 - Recuperação de senha por pergunta secreta: o usuário informa email e a resposta; se o hash bater com o armazenado, pode definir uma nova senha (ControleUsuario.recuperarSenha).
 - Exclusão de conta com validação de cursos ativos: um usuário só pode ser excluído se não tiver nenhum curso em estado 0 ou 1; cursos em estado 2 ou 3 são removidos em cascata junto com a conta (ControleUsuario.excluirUsuario).
 - Listagem alfabética por usuário: ArquivoCurso.readAllOrdenadoPorNome(idUsuario) combina o índice 1:N com o índice de nomes para montar o menu conforme a especificação.
 - Geração automática de NanoID: ControleCurso.cadastrarCurso gera o código compartilhável de 10 caracteres no padrão NanoID usando `java.security.SecureRandom` (padrão do NanoID real) e regera em caso raríssimo de colisão verificada via `ArquivoCurso.readByCodigo`.
-- Busca de cursos por código NanoID (TP2): `ControleCurso.buscarPorCodigo` consulta o `indiceCodigoCurso` em O(1) e ainda confirma por igualdade exata o código recuperado, blindando contra colisões teóricas de `hashCode()`.
-- Listagem paginada de cursos disponíveis (TP2): `ControleCurso.listarTodosCursosDisponiveis` filtra apenas cursos em estado 0 e ordena por data de início; a paginação fica na visão (10 por página, item 10 → `(0)`, navegação A/B condicionada à existência da página anterior/próxima).
-- Varredura completa do arquivo de cursos (TP2): `ArquivoCurso.readAllCursos` abre um `RandomAccessFile` próprio em modo read-only sobre o `dados.db` e percorre o arquivo respeitando o cabeçalho (12 bytes) e o esquema de lápides do `Arquivo` do prof, sem alterar o pacote `aed3`.
-- Inscrição com validação de regras de negócio (TP2): `ControleInscricao.inscrever` valida em ordem: curso existe, curso em estado 0, dono não se inscreve no próprio curso, inscrição dupla. Retorna códigos de status (OK ou ERRO_*) para que a Visão renderize a mensagem adequada sem precisar lidar com exceptions.
-- Consulta bidirecional do relacionamento N:N (TP2): a partir de qualquer um dos dois lados (curso ou usuário), uma única consulta na Árvore B+ correspondente com `ParIdId(id, -1)` retorna todas as inscrições daquele lado em O(log n) + tamanho do resultado. `ControleInscricao.listarMinhasInscricoes` (lado aluno) e `listarInscritos` (lado dono) materializam isso em objetos Curso/Usuário emparelhados com a inscrição.
-- Integridade referencial em cascata (TP2): cancelar um curso (`ControleCurso.excluirCurso`) cancela automaticamente todas as inscrições daquele curso antes de remover o registro. Excluir uma conta de usuário (`ControleUsuario.excluirUsuario`) cancela as inscrições do usuário em cursos de terceiros e também as inscrições de terceiros nos cursos do usuário (que serão deletados em seguida). Nenhuma inscrição órfã pode ficar apontando para um curso ou usuário inexistente.
-- Exportação CSV de inscritos (TP2): `ControleInscricao.exportarCSV` gera CSV com cabeçalho (Nome, Email, DataInscricao) e escapa adequadamente campos contendo vírgulas, aspas duplas (duplicadas conforme RFC 4180) ou quebras de linha. A `VisaoInscricao` grava em `./exportacoes/inscritos_<codigo>.csv` e informa o caminho ao usuário.
-- Gestão de estado do curso: as opções C, D e E da tela de detalhe alteram o estado (encerrar inscrições, concluir, cancelar). O cancelamento equivale à exclusão quando não há inscritos (requisito já preparado para o TP2).
+- Gestão de estado do curso: as opções C, D e E da tela de detalhe alteram o estado (encerrar inscrições, concluir, cancelar). O cancelamento equivale à exclusão quando não há inscritos.
 - Unicidade de email: verificada no cadastro e na edição de dados do usuário via ArquivoUsuario.readEmail.
 - Manutenção sincronizada dos índices: todos os create/update/delete de ArquivoUsuario e ArquivoCurso atualizam os índices correspondentes, garantindo consistência mesmo quando o email do usuário ou o nome/dono do curso mudam.
-- Fechamento seguro dos arquivos: Principal fecha ArquivoUsuario, ArquivoCurso e o Scanner em um bloco finally, evitando escritas pendentes truncadas.
+- Fechamento seguro dos arquivos: Principal fecha ArquivoUsuario, ArquivoCurso, ArquivoCursoUsuario e o Scanner em um bloco finally, evitando escritas pendentes truncadas.
+
+#### TP2 — Busca de cursos
+- Busca de cursos por código NanoID: `ControleCurso.buscarPorCodigo` consulta o `indiceCodigoCurso` em O(1) e ainda confirma por igualdade exata o código recuperado, blindando contra colisões teóricas de `hashCode()`. A tela `VisaoCurso.telaBuscaPorCodigoInscricao` pede o código e abre direto o detalhe do curso conforme a especificação.
+- Listagem paginada de cursos disponíveis: `ControleCurso.listarTodosCursosDisponiveis` filtra apenas cursos em estado 0 e ordena por data de início; a paginação fica na visão (10 por página, item 10 → `(0)`, navegação A/B condicionada à existência da página anterior/próxima).
+- Varredura completa do arquivo de cursos: `ArquivoCurso.readAllCursos` abre um `RandomAccessFile` próprio em modo read-only sobre o `dados.db` e percorre o arquivo respeitando o cabeçalho (12 bytes) e o esquema de lápides do `Arquivo` do prof, sem alterar o pacote `aed3`.
+- Tela de detalhe do visitante (`telaDetalheCursoVisitante`): exibe CÓDIGO, CURSO, AUTOR (resolvido pelo nome via `ControleCurso.buscarAutor`), DESCRIÇÃO e DATA DE INÍCIO. O botão de ação se adapta ao contexto.
+
+#### TP2 — Relacionamento N:N
+- Entidade de associação `CursoUsuario` (id, idCurso, idUsuario, dataInscricao) com 20 bytes fixos por registro e duas Árvores B+ sincronizadas em `create`/`delete`/`update`: `indiceCursoInscricao` (lado dono) e `indiceUsuarioInscricao` (lado aluno).
+- Consulta bidirecional do relacionamento: a partir de qualquer um dos dois lados (curso ou usuário), uma única consulta na Árvore B+ correspondente com `ParIdId(id, -1)` retorna todas as inscrições daquele lado em O(log n) + tamanho do resultado, graças ao coringa do `compareTo` do `ParIdId`.
+- Integridade referencial em cascata: cancelar um curso (`ControleCurso.excluirCurso`) cancela automaticamente todas as inscrições daquele curso antes de remover o registro. Excluir uma conta de usuário (`ControleUsuario.excluirUsuario`) cancela as inscrições do usuário em cursos de terceiros e também as inscrições de terceiros nos cursos do usuário que serão deletados. Nenhuma inscrição órfã pode ficar apontando para um curso ou usuário inexistente.
+
+#### TP2 — Gerenciamento das próprias inscrições
+- Inscrição com validação de regras de negócio: `ControleInscricao.inscrever` valida em ordem: curso existe, curso em estado 0, dono não se inscreve no próprio curso, inscrição dupla. Retorna códigos de status (OK ou ERRO_*) para que a Visão renderize a mensagem adequada sem precisar lidar com exceptions.
+- Menu Minhas Inscrições (`VisaoInscricao.menuMinhasInscricoes`): lista as inscrições atuais do usuário no topo, numeradas, com sufixo de estado do curso quando aplicável: `(INSCRICOES ENCERRADAS)`, `(CURSO CONCLUIDO)`, `(CURSO CANCELADO)`. Oferece as três opções de busca (A/B/C) e selecionar pelo número abre o detalhe da inscrição.
+- Tela de detalhe de uma inscrição própria (`telaDetalheMinhaInscricao`): exibe CÓDIGO, CURSO, AUTOR, DESCRIÇÃO, DATA DE INÍCIO, INSCRITO EM e oferece o botão "(A) Cancelar minha inscricao no curso" com confirmação S/N.
+- Botão contextual na tela do visitante: `VisaoCurso.telaDetalheCursoVisitante` consulta `estaInscrito` ao abrir e alterna entre "(A) Fazer minha inscrição no curso" e "(A) Cancelar minha inscrição no curso" — sem botão se o usuário é o dono ou se o curso não está mais aceitando inscrições.
+
+#### TP2 — Visão dos inscritos nos seus cursos
+- Tela "Gerenciar inscritos no curso" (`VisaoInscricao.telaGerenciarInscritos`): acessada do menu Meus Cursos > curso > opção A. Lista numerada dos inscritos com nome + data de inscrição em ordem alfabética. Selecionar pelo número abre o detalhe do inscrito; opção "(A) Exportar lista" gera arquivo CSV.
+- Tela de detalhe do inscrito (`telaDetalheInscrito`): exibe NOME, EMAIL e DATA DE INSCRIÇÃO do aluno (visão do dono do curso), com opção "(A) Cancelar a inscrição deste aluno" e confirmação S/N. Permite ao dono remover individualmente cada inscrição.
+- Exportação CSV de inscritos: `ControleInscricao.exportarCSV` gera CSV com cabeçalho (Nome, Email, DataInscricao) e escapa adequadamente campos contendo vírgulas, aspas duplas (duplicadas conforme RFC 4180) ou quebras de linha. A `VisaoInscricao` grava em `./exportacoes/inscritos_<codigo>.csv` e informa o caminho ao usuário.
+- Aviso de inscritos no cancelamento de curso: a opção "(E) Cancelar curso" da tela de detalhe do dono consulta `controleInscricao.contarInscritos` antes da confirmação e mostra quantas inscrições serão atingidas pela cascata.
+
 
 ## Checklist Relatorio
 
