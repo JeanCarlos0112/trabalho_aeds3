@@ -612,7 +612,7 @@ existia exatamente porque o cadastro antigo forçava `LocalDate.now()`.
 
 ---
 
-## O que o **JEAN** entregou (TP3 — Índice invertido + busca por palavras-chave)
+## O que o **JEAN** + **ANDRÉ** + **LUIZ** entregou (TP3 — Índice invertido + busca por palavras-chave)
 
 Esta etapa implementa o terceiro trabalho prático: criar um índice
 invertido sobre os nomes dos cursos, mantê-lo sincronizado e oferecer
