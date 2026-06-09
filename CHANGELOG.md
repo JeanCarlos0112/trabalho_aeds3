@@ -48,7 +48,7 @@
 - **Total acumulado: 98/98 verificações automáticas.**
 
 
-### [2026-05-26] — JEAN — TP2 (fix): Data de início informada pelo usuário no cadastro do curso
+### [2026-06-09] — JEAN — TP2 (fix): Data de início informada pelo usuário no cadastro do curso
 #### Arquivos modificados:
 
 - entidades/cursos/ControleCurso.java — Método `cadastrarCurso` agora recebe `LocalDate dataInicio` como parâmetro. Antes da correção, a data era atribuída automaticamente via `LocalDate.now()` no ato do cadastro, o que impedia o proponente de cadastrar hoje um curso que começaria em data futura (apontamento do professor na entrega do TP2).
