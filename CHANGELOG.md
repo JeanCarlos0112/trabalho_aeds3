@@ -1,24 +1,43 @@
-### [2026-06-09] — JEAN — TP3: Índice invertido + busca por palavras-chave (TFxIDF)
+### [2026-06-09] — LUIZ — TP3: Busca por palavras-chave (TFxIDF)
 #### Arquivos criados:
 
-- aed3/ListaInvertida.java — Lista invertida com dicionário + blocos encadeados, do código fornecido pelo Prof. Marcos Kutova (`kutova/AEDsIII/ListaInvertida`). Adicionado apenas o método `close()` para integrar com o ciclo de vida do projeto (todos os índices fecham em sequência no `ArquivoCurso.close()`).
-- aed3/ElementoLista.java — Par `(idCurso, frequência)` armazenado em cada termo da lista invertida (também do prof, sem alterações).
-- entidades/cursos/TermosUtil.java — Utilitário de processamento de termos com pipeline em três etapas: (1) tokenização por separadores não-letra/dígito, (2) normalização lowercase + remoção de acentos via `Normalizer.NFD` + remoção de combining marks, (3) filtragem de stop words em português (artigos, preposições, conjunções, pronomes, numerais por extenso, formas verbais auxiliares).
 - entidades/cursos/IndiceInvertidoCurso.java — Wrapper sobre `ListaInvertida` com a lógica TFxIDF. `inserir(idCurso, nome)` extrai termos, calcula TF como `ocorrências/total_termos_válidos`, insere os pares e incrementa o contador de entidades (N). `remover(idCurso, nome)` deleta os termos e decrementa N. `atualizar(idCurso, nomeAntigo, nomeNovo)` re-indexa sem mexer em N. `buscar(query)` aplica o modelo TFxIDF da especificação: para cada termo único da query, calcula `IDF = log10(N/df) + 1`, multiplica pelos TFs armazenados, soma scores por idCurso e ordena decrescente.
 - TesteIndiceInvertido.java — 23 verificações em 6 blocos cobrindo: TermosUtil (tokenização, acentos, lowercase, stop words, edge cases null/vazio), cenário completo da spec (4 cursos, busca "Inteligencia Artificial" → ordem 1, 3, 2 com curso 4 ausente), sincronização em delete/update do nome, robustez da busca (stop words puras, termos inexistentes, case-insensitive, null), filtragem por estado, e bootstrap automático de índice vazio com cursos legados.
 
 #### Arquivos modificados:
 
-- entidades/cursos/ArquivoCurso.java — Adicionado o quarto índice `indiceInvertido` (instância de `IndiceInvertidoCurso`). Sincronizado em `create` (insere termos do nome novo), `delete` (remove termos do nome do curso excluído) e `update` (re-indexa apenas quando o nome muda — preserva o N porque é o mesmo curso). Bootstrap no construtor: se `numeroEntidades() == 0` e `readAllCursos()` retorna cursos, indexa todos automaticamente (cobre o caso de banco antigo do TP2 reaberto agora). Novo método público `readByPalavras(query)` que delega para o índice invertido e materializa os `Curso`. Fechamento sequencial em `close()`.
-- entidades/cursos/ControleCurso.java — Método `buscarPorPalavras(String)` que chama `arqCurso.readByPalavras` e filtra para estado 0 (apenas cursos recebendo inscrições aparecem no menu de descoberta para inscrição).
 - entidades/cursos/VisaoCurso.java — Nova tela pública `telaBuscaPorPalavrasInscricao(idUsuarioLogado)`: pede a query ao usuário, exibe contagem total de resultados e relevância, paginação 10/página (item 10 → `(0)`), navegação A/B condicional, e selecionar pelo número abre o `telaDetalheCursoVisitante` já existente (reusa todo o fluxo de inscrição do TP2).
 - entidades/inscricoes/VisaoInscricao.java — Case "B" do menu Minhas Inscrições deixou de ser placeholder e passou a chamar `visaoCurso.telaBuscaPorPalavrasInscricao(idUsuarioLogado)`.
 
 #### Observações:
 
-- **Validação contra os números da spec**: a especificação dá os scores esperados como `(1; 0.808), (3; 0.656), (2; 0.375)`. Minha implementação calcula `(1; 0.809), (3; 0.710), (2; 0.375)`. Os valores do Curso 1 e Curso 2 batem (diferença em 0.001 é arredondamento float). O valor do Curso 3 difere porque a spec tem um typo numérico: ela mesma documenta que TF(artificial,3) × IDF(artificial) deveria dar `0.260` (`0.2 × 1.301`) e em vez disso escreve `0.206` no texto. O cálculo correto pela fórmula que a própria spec define dá `0.710`. **A ordem final dos cursos é a mesma (1, 3, 2)** e o curso 4 sai do resultado nos dois cálculos.
 - O número de entidades N usado no IDF é mantido pela própria `ListaInvertida.numeroEntidades()` via `incrementa/decrementaEntidades()`.
 - Stop words são gravadas já normalizadas (lowercase, sem acentos) para casarem com o resultado da `normalizar()` na comparação.
+
+#### Testes (todos verdes):
+
+- TesteRelacionamento1N: 23/23 (regressão TP1)
+- TesteBuscaCursos: 23/23 (regressão TP2-busca)
+- TesteInscricaoNN: 29/29 (regressão TP2-N:N)
+- TesteIndiceInvertido: 23/23 (TP3 novo)
+- **Total acumulado: 98/98 verificações automáticas.**
+
+### [2026-06-09] — JEAN — TP3: Índice invertido
+#### Arquivos criados:
+
+- aed3/ListaInvertida.java — Lista invertida com dicionário + blocos encadeados, do código fornecido pelo Prof. Marcos Kutova (`kutova/AEDsIII/ListaInvertida`). Adicionado apenas o método `close()` para integrar com o ciclo de vida do projeto (todos os índices fecham em sequência no `ArquivoCurso.close()`).
+- aed3/ElementoLista.java — Par `(idCurso, frequência)` armazenado em cada termo da lista invertida (também do prof, sem alterações).
+- entidades/cursos/TermosUtil.java — Utilitário de processamento de termos com pipeline em três etapas: (1) tokenização por separadores não-letra/dígito, (2) normalização lowercase + remoção de acentos via `Normalizer.NFD` + remoção de combining marks, (3) filtragem de stop words em português (artigos, preposições, conjunções, pronomes, numerais por extenso, formas verbais auxiliares).
+
+#### Arquivos modificados:
+
+- entidades/cursos/ArquivoCurso.java — Adicionado o quarto índice `indiceInvertido` (instância de `IndiceInvertidoCurso`). Sincronizado em `create` (insere termos do nome novo), `delete` (remove termos do nome do curso excluído) e `update` (re-indexa apenas quando o nome muda — preserva o N porque é o mesmo curso). Bootstrap no construtor: se `numeroEntidades() == 0` e `readAllCursos()` retorna cursos, indexa todos automaticamente (cobre o caso de banco antigo do TP2 reaberto agora). Novo método público `readByPalavras(query)` que delega para o índice invertido e materializa os `Curso`. Fechamento sequencial em `close()`.
+- entidades/cursos/ControleCurso.java — Método `buscarPorPalavras(String)` que chama `arqCurso.readByPalavras` e filtra para estado 0 (apenas cursos recebendo inscrições aparecem no menu de descoberta para inscrição).
+
+#### Observações:
+
+- **Validação contra os números da spec**: a especificação dá os scores esperados como `(1; 0.808), (3; 0.656), (2; 0.375)`. Minha implementação calcula `(1; 0.809), (3; 0.710), (2; 0.375)`. Os valores do Curso 1 e Curso 2 batem (diferença em 0.001 é arredondamento float). O valor do Curso 3 difere porque a spec tem um typo numérico: ela mesma documenta que TF(artificial,3) × IDF(artificial) deveria dar `0.260` (`0.2 × 1.301`) e em vez disso escreve `0.206` no texto. O cálculo correto pela fórmula que a própria spec define dá `0.710`. **A ordem final dos cursos é a mesma (1, 3, 2)** e o curso 4 sai do resultado nos dois cálculos.
+
 
 #### Testes (todos verdes):
 
