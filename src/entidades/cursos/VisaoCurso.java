@@ -1,5 +1,6 @@
 package entidades.cursos;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -31,6 +32,10 @@ import entidades.inscricoes.VisaoInscricao;
  */
 public class VisaoCurso {
     private static final DateTimeFormatter FMT_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    // Parser tolerante para a entrada do usuario: aceita dia ou mes com 1 ou
+    // 2 digitos (ex: "5/8/2026" e "15/08/2026" valem). Para EXIBICAO continua
+    // sendo o FMT_DATA acima, que sempre formata com 2 digitos para alinhamento.
+    private static final DateTimeFormatter PARSER_DATA = DateTimeFormatter.ofPattern("d/M/yyyy");
 
     private ControleCurso controle;
     private ControleInscricao controleInscricao;
@@ -139,8 +144,24 @@ public class VisaoCurso {
         System.out.print("Descricao (programa, dias, locais, ...): ");
         String descricao = console.nextLine();
 
+        // Data de inicio informada pelo usuario (correcao do TP2):
+        // antes o sistema usava LocalDate.now() automaticamente, mas o
+        // proponente precisa poder cadastrar hoje um curso que comecara
+        // em data futura. Le ate receber uma data valida no formato
+        // dd/MM/yyyy (mesmo padrao usado nas demais telas).
+        LocalDate dataInicio = null;
+        System.out.print("Data de inicio (dd/MM/yyyy): ");
+        while (dataInicio == null) {
+            String entrada = console.nextLine().trim();
+            try {
+                dataInicio = LocalDate.parse(entrada, PARSER_DATA);
+            } catch (java.time.format.DateTimeParseException e) {
+                System.out.print("Data invalida. Use dd/MM/yyyy (ex: 15/08/2026): ");
+            }
+        }
+
         try {
-            int idGerado = controle.cadastrarCurso(idUsuarioLogado, nome, descricao);
+            int idGerado = controle.cadastrarCurso(idUsuarioLogado, nome, descricao, dataInicio);
             System.out.println("\nCurso cadastrado com sucesso! (ID interno: " + idGerado + ")");
         } catch (Exception e) {
             System.out.println("Erro ao cadastrar: " + e.getMessage());
@@ -292,7 +313,7 @@ public class VisaoCurso {
         java.time.LocalDate data = c.getDataInicio();
         if (!dataStr.isEmpty()) {
             try {
-                data = java.time.LocalDate.parse(dataStr, FMT_DATA);
+                data = java.time.LocalDate.parse(dataStr, PARSER_DATA);
             } catch (Exception e) {
                 System.out.println("Data invalida. Mantendo a anterior.");
             }

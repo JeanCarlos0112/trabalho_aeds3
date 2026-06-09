@@ -29,10 +29,15 @@ public class ControleCurso {
 
     /**
      * Cadastra novo curso, gerando NanoID unico e vinculando ao usuario logado.
+     * A data de inicio e informada pela camada de Visao (vinda do usuario), nao
+     * derivada de LocalDate.now() - um curso pode ser cadastrado hoje para
+     * comecar em uma data futura informada pelo proponente.
+     *
      * O ParCodigoId/hash assume que o NanoID e unico, entao garantimos isso
      * regerando caso colida com algum existente (caso extremamente raro).
      */
-    public int cadastrarCurso(int idUsuario, String nome, String descricao) throws Exception {
+    public int cadastrarCurso(int idUsuario, String nome, String descricao,
+                              LocalDate dataInicio) throws Exception {
         String nanoid;
         int tentativas = 0;
         do {
@@ -43,7 +48,7 @@ public class ControleCurso {
             }
         } while (arqCurso.readByCodigo(nanoid) != null);
 
-        Curso novoCurso = new Curso(idUsuario, nome, descricao, LocalDate.now(), nanoid, 0);
+        Curso novoCurso = new Curso(idUsuario, nome, descricao, dataInicio, nanoid, 0);
         return arqCurso.create(novoCurso);
     }
 

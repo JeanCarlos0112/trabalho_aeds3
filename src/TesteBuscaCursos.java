@@ -1,4 +1,5 @@
 import java.io.File;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import entidades.usuarios.*;
 import entidades.cursos.*;
@@ -44,13 +45,17 @@ public class TesteBuscaCursos {
             System.out.println("  Alice id=" + idAlice + ", Bob id=" + idBob);
 
             // SETUP - cursos via ControleCurso (gera NanoID real)
+            // Datas escolhidas para garantir ordem nao-ambigua no Teste 5.
             printSecao("SETUP - Cursos via ControleCurso");
+            LocalDate dataC1 = LocalDate.of(2026, 7, 10);
+            LocalDate dataC2 = LocalDate.of(2026, 8, 20);
+            LocalDate dataC3 = LocalDate.of(2026, 9, 5);
             int idC1 = ctrlCurso.cadastrarCurso(idAlice, "Python basico",
-                "Introducao ao Python.");
+                "Introducao ao Python.", dataC1);
             int idC2 = ctrlCurso.cadastrarCurso(idAlice, "Java avancado",
-                "Conceitos avancados em Java.");
+                "Conceitos avancados em Java.", dataC2);
             int idC3 = ctrlCurso.cadastrarCurso(idBob,   "DevOps essencial",
-                "Pipelines e infra como codigo.");
+                "Pipelines e infra como codigo.", dataC3);
             Curso c1 = arqCurso.read(idC1);
             Curso c2 = arqCurso.read(idC2);
             Curso c3 = arqCurso.read(idC3);
@@ -58,8 +63,10 @@ public class TesteBuscaCursos {
             System.out.println("  " + c2.getNome() + " - codigo " + c2.getCodigo());
             System.out.println("  " + c3.getNome() + " - codigo " + c3.getCodigo());
 
-            // TESTE 1 - codigo NanoID tem 10 caracteres
-            printSecao("TESTE 1 - NanoID com 10 caracteres");
+            // TESTE 1 - codigo NanoID tem 10 caracteres E data foi gravada corretamente
+            // (verificacao adicional: a data informada pelo usuario eh persistida,
+            // confirmando que a correcao do bug do LocalDate.now() funciona)
+            printSecao("TESTE 1 - NanoID + data informada persistem corretamente");
             check("c1.codigo.length == 10", c1.getCodigo().length() == 10);
             check("c2.codigo.length == 10", c2.getCodigo().length() == 10);
             check("c3.codigo.length == 10", c3.getCodigo().length() == 10);
@@ -67,6 +74,12 @@ public class TesteBuscaCursos {
                 !c1.getCodigo().equals(c2.getCodigo()) &&
                 !c1.getCodigo().equals(c3.getCodigo()) &&
                 !c2.getCodigo().equals(c3.getCodigo()));
+            check("c1.dataInicio == 2026-07-10 (informada pelo usuario)",
+                c1.getDataInicio().equals(dataC1));
+            check("c2.dataInicio == 2026-08-20 (informada pelo usuario)",
+                c2.getDataInicio().equals(dataC2));
+            check("c3.dataInicio == 2026-09-05 (informada pelo usuario)",
+                c3.getDataInicio().equals(dataC3));
 
             // TESTE 2 - busca por codigo retorna o curso certo
             printSecao("TESTE 2 - Busca por codigo NanoID");
@@ -107,26 +120,15 @@ public class TesteBuscaCursos {
 
             // TESTE 5 - ordenacao por data de inicio
             printSecao("TESTE 5 - Ordenacao por data de inicio");
-            // todos os 3 cursos foram criados com LocalDate.now(), mesma data.
-            // criamos um curso "futuro" e um "passado" para validar
+            // Agora que cadastrarCurso aceita a data, passamos direto - sem
+            // precisar do update gambiarra que existia antes da correcao.
+            // Cadastra um curso "muito futuro" (depois de todos) e um
+            // "muito passado" (antes de todos), e confirma que a ordenacao
+            // por data de inicio coloca-os nas pontas da lista.
             int idFuturo = ctrlCurso.cadastrarCurso(idAlice, "Curso Futuro",
-                "Comeca depois.");
-            Curso futuro = arqCurso.read(idFuturo);
-            // empurra a data uns 30 dias pra frente
-            Curso futuroAtualizado = new Curso(
-                futuro.getID(), futuro.getIdUsuario(), futuro.getNome(),
-                futuro.getDescricao(), futuro.getDataInicio().plusDays(30),
-                futuro.getCodigo(), futuro.getEstado());
-            arqCurso.update(futuroAtualizado);
-
+                "Comeca depois.", LocalDate.of(2027, 12, 1));
             int idPassado = ctrlCurso.cadastrarCurso(idAlice, "Curso Passado",
-                "Comeca antes.");
-            Curso passado = arqCurso.read(idPassado);
-            Curso passadoAtualizado = new Curso(
-                passado.getID(), passado.getIdUsuario(), passado.getNome(),
-                passado.getDescricao(), passado.getDataInicio().minusDays(30),
-                passado.getCodigo(), passado.getEstado());
-            arqCurso.update(passadoAtualizado);
+                "Comeca antes.", LocalDate.of(2025, 1, 1));
 
             disponiveis = ctrlCurso.listarTodosCursosDisponiveis();
             check("primeiro da lista eh 'Curso Passado'",

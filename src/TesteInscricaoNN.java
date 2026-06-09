@@ -1,4 +1,5 @@
 import java.io.File;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import entidades.usuarios.*;
 import entidades.cursos.*;
@@ -53,9 +54,12 @@ public class TesteInscricaoNN {
             int idAlice = arqUsuario.create(new Usuario("Alice",  "alice@x", 1, "?", 1));
             int idBob   = arqUsuario.create(new Usuario("Bob",    "bob@x",   1, "?", 1));
             int idCarol = arqUsuario.create(new Usuario("Carol",  "carol@x", 1, "?", 1));
-            int idCursoAlice = ctrlCurso.cadastrarCurso(idAlice, "Python", "Curso Python");
-            int idCursoBob   = ctrlCurso.cadastrarCurso(idBob,   "Java",   "Curso Java");
-            int idCursoCarol = ctrlCurso.cadastrarCurso(idCarol, "Rust",   "Curso Rust");
+            int idCursoAlice = ctrlCurso.cadastrarCurso(idAlice, "Python", "Curso Python",
+                LocalDate.of(2026, 8, 15));
+            int idCursoBob   = ctrlCurso.cadastrarCurso(idBob,   "Java",   "Curso Java",
+                LocalDate.of(2026, 9, 10));
+            int idCursoCarol = ctrlCurso.cadastrarCurso(idCarol, "Rust",   "Curso Rust",
+                LocalDate.of(2026, 10, 5));
             System.out.println("  Alice=" + idAlice + " curso=" + idCursoAlice);
             System.out.println("  Bob="   + idBob   + " curso=" + idCursoBob);
             System.out.println("  Carol=" + idCarol + " curso=" + idCursoCarol);

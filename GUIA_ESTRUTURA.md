@@ -570,3 +570,35 @@ N:N acima. Combinado com o `TesteRelacionamento1N` (23/23) e o
 `TesteBuscaCursos` (20/20), o projeto tem **72 verificações automáticas**
 rodando verdes.
 
+
+---
+
+## Correção pós-entrega TP2 — Data de início informada pelo usuário
+
+Apontamento do professor na entrega do TP2: a data de início do curso não
+deve ser a data atual, mas uma data informada pelo usuário.
+
+A causa era simples: `ControleCurso.cadastrarCurso` chamava `LocalDate.now()`
+ao construir o objeto `Curso`, em vez de receber a data como parâmetro.
+Cursos cadastrados hoje para começar em data futura ficavam, portanto,
+com a data errada.
+
+A correção alterou:
+
+- `ControleCurso.cadastrarCurso(int, String, String, LocalDate)` — passou
+  a receber a data como parâmetro.
+- `VisaoCurso.telaNovoCurso` — passou a pedir a data ao usuário em formato
+  `dd/MM/yyyy`, com loop de validação que rejeita entradas inválidas e
+  insiste até receber uma data parseável. O parser de entrada
+  (`PARSER_DATA`, padrão `d/M/yyyy`) tolera 1 ou 2 dígitos no dia/mês para
+  reduzir atrito; o display continua sempre formatando com 2 dígitos
+  (`FMT_DATA`, padrão `dd/MM/yyyy`).
+- `VisaoCurso.telaCorrecaoDados` — também passou a usar o `PARSER_DATA`
+  tolerante, para que a edição de curso aceite o mesmo padrão de entrada.
+
+Após a correção, a bateria de testes subiu para **75 verificações**
+verdes — o `TesteBuscaCursos` ganhou 3 verificações novas no Teste 1
+confirmando que a data informada é persistida corretamente, e o Teste 5
+(ordenação por data) foi simplificado removendo o `update` gambiarra que
+existia exatamente porque o cadastro antigo forçava `LocalDate.now()`.
+

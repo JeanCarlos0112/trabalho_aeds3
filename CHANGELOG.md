@@ -1,3 +1,18 @@
+### [2026-05-26] — JEAN — TP2 (fix): Data de início informada pelo usuário no cadastro do curso
+#### Arquivos modificados:
+
+- entidades/cursos/ControleCurso.java — Método `cadastrarCurso` agora recebe `LocalDate dataInicio` como parâmetro. Antes da correção, a data era atribuída automaticamente via `LocalDate.now()` no ato do cadastro, o que impedia o proponente de cadastrar hoje um curso que começaria em data futura (apontamento do professor na entrega do TP2).
+- entidades/cursos/VisaoCurso.java — `telaNovoCurso` agora pede a data de início ao usuário no formato `dd/MM/yyyy`, com loop de validação que rejeita entradas mal formatadas e pede de novo até receber uma data válida. Adicionado `PARSER_DATA` (`d/M/yyyy`) tolerante a um ou dois dígitos no dia/mês (aceita `5/8/2026` e `05/08/2026`); o display continua usando `FMT_DATA` (`dd/MM/yyyy`) para alinhamento visual. `telaCorrecaoDados` (edição de curso existente) também passou a usar `PARSER_DATA` para consistência.
+- TesteBuscaCursos.java — As 5 chamadas de `cadastrarCurso` foram atualizadas para passar datas explícitas. Adicionadas 3 verificações novas no Teste 1 confirmando que a data informada pelo usuário é persistida corretamente. O Teste 5 (ordenação por data de início) foi simplificado removendo a gambiarra antiga de `update` que existia justamente porque o cadastro forçava `LocalDate.now()`.
+- TesteInscricaoNN.java — As 3 chamadas de `cadastrarCurso` foram atualizadas para passar datas explícitas.
+
+#### Observações:
+
+- Sem alteração na entidade Curso ou no formato em disco — a correção é puramente do construtor/visão.
+- Bateria de testes subiu de 72 para 75: TesteRelacionamento1N (23/23), TesteBuscaCursos (23/23, +3 sobre persistência de data), TesteInscricaoNN (29/29).
+- Validado E2E: entradas como "hoje", "01-08-2026", "2026/08/01" são rejeitadas; "01/08/2026" e "15/8/2026" são aceitas; o curso aparece na lista de Meus Cursos com a data correta formatada.
+
+
 ### [2026-05-19] — ANDRÉ — TP2: Visão dos inscritos nos seus cursos
 #### Arquivos criados:
 
