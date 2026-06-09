@@ -8,6 +8,10 @@ A proposta é basicamente as informações previas que o professor responsavel p
 ## CHANGELOG:
 As mudanças detalhadas e a checklist estará no arquivo ao final dessa seção, irei colocar um resumo do changelog para poder ficar de mais facil visualização o que cada participante fez de forma resumida:
 
+**09/06 — JEAN (TP3)**: Implementou o índice invertido completo do TP3 — `aed3/ListaInvertida` e `aed3/ElementoLista` do código fornecido pelo prof. (com adição apenas do `close()`), `entidades/cursos/TermosUtil` com o pipeline de tokenização + normalização (lowercase + sem acentos via `Normalizer.NFD`) + filtragem de stop words em português, `entidades/cursos/IndiceInvertidoCurso` wrapper com cálculo TFxIDF (TF na inserção, IDF on-the-fly via `log10(N/df)+1` na busca), sincronização do índice em `ArquivoCurso.create/delete/update` e bootstrap automático para cursos legados do TP2. `ControleCurso.buscarPorPalavras` filtrando estado 0. `VisaoCurso.telaBuscaPorPalavrasInscricao` com paginação 10/página. `VisaoInscricao` case "B" agora chama a busca real. `TesteIndiceInvertido` com 23 verificações cobrindo o cenário completo da spec.
+
+**26/05 — JEAN (TP2 fix)**: Corrigiu o apontamento do professor — a data de início do curso agora é informada pelo usuário em `dd/MM/yyyy` em vez de ser preenchida automaticamente com `LocalDate.now()`. `VisaoCurso.telaNovoCurso` ganhou loop de validação de formato com parser tolerante (aceita `5/8/2026` e `05/08/2026`); `telaCorrecaoDados` recebeu o mesmo parser por consistência. Bateria subiu para 75 testes (+3 verificações sobre persistência da data).
+
 **19/05 — JEAN + LUIZ + ANDRÉ (TP2)**: Implementou o relacionamento N:N completo do TP2 — entidade de associação `CursoUsuario`, CRUD com duas Árvores B+ sincronizadas (`indiceCursoInscricao` e `indiceUsuarioInscricao`), `ControleInscricao` com regras de negócio (curso inexistente, fora do estado 0, auto-inscrição, inscrição dupla), `VisaoInscricao` com quatro telas (menu Minhas Inscrições com lista das atuais, detalhe da inscrição com cancelar, gerenciar inscritos do dono, detalhe do inscrito com cancelar). Integridade referencial em cascata: cancelar curso cancela inscrições, excluir conta cancela inscrições em ambas as direções. Exportação CSV dos inscritos com escape RFC 4180. `TesteInscricaoNN` com 29 verificações.
 
 **12/05 — MIRO (TP2)**: Implementou a Busca de Cursos completa do menu Minhas Inscrições — busca por código NanoID com novo índice Hash Extensível (ParCodigoId), listagem paginada de cursos disponíveis (10 por página, ordenada por data de início) e tela de detalhe do visitante com resolução de autor. Adicionou também o TesteBuscaCursos com 20 verificações.
@@ -64,4 +68,16 @@ O arquivo contempla uma especie de guia para a estrutura de pastas que o **MIRO*
 #### Documentação e fechamento
 - [x] Preencher checklist do relatório do TP2 no README.md. (Responsabilidade: **JEAN**)
 - [ ] Gravar novo vídeo de demonstração do TP2 (até 3 minutos).
-- [ ] Busca por palavras-chave (reservado para o TP3).
+
+
+### TP3 — completo:
+
+- [x] Implementar o índice invertido para os cursos usando as palavras dos nomes dos cursos, com a classe `ListaInvertida` do prof. (Responsabilidade: **JEAN**)
+- [x] Implementar a busca de cursos por palavras oferecendo respostas ordenadas pelo valor TFxIDF. (Responsabilidade: **JEAN**)
+- [x] Integrar a busca por palavras no menu Minhas Inscrições (opção B) — substituiu o placeholder do TP2. (Responsabilidade: **JEAN**)
+- [x] Implementar a sincronização do índice em create/delete/update de cursos. (Responsabilidade: **JEAN**)
+- [x] Implementar bootstrap automático do índice para cursos legados do TP2. (Responsabilidade: **JEAN**)
+- [x] Implementar o pipeline de processamento de termos (tokenização + normalização + stop words PT). (Responsabilidade: **JEAN**)
+- [x] Criar `TesteIndiceInvertido` reproduzindo o cenário da spec. (Responsabilidade: **JEAN**)
+- [x] Preencher checklist do relatório do TP3 no README.md. (Responsabilidade: **JEAN**)
+- [ ] Gravar vídeo de demonstração do TP3 (até 3 minutos).

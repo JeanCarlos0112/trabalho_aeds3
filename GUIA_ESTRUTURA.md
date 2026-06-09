@@ -11,6 +11,8 @@ projeto/
 │   │   ├── Arquivo.java                       ← CRUD genérico
 │   │   ├── ArvoreBMais.java                   ← Árvore B+
 │   │   ├── HashExtensivel.java                ← Hash Extensível
+│   │   ├── ListaInvertida.java                ← Lista Invertida (TP3, do prof) — só ganhou close()
+│   │   ├── ElementoLista.java                 ← Par (idCurso, frequência) usado pela Lista Invertida
 │   │   ├── InterfaceArvoreBMais.java
 │   │   ├── InterfaceEntidade.java
 │   │   ├── InterfaceHashExtensivel.java
@@ -28,10 +30,12 @@ projeto/
 │   │   │
 │   │   ├── cursos/
 │   │   │   ├── Curso.java                     ← Entidade (MIRO)
-│   │   │   ├── ArquivoCurso.java              ← CRUD + B+ 1:N + Hash código (JEAN)
+│   │   │   ├── ArquivoCurso.java              ← CRUD + B+ 1:N + Hash código + Lista Invertida (JEAN)
 │   │   │   ├── ParCodigoId.java               ← Par (código, id) p/ hash NanoID (JEAN, TP2)
-│   │   │   ├── VisaoCurso.java                ← View — E/S de dados (ANDRÉ + JEAN no TP2)
-│   │   │   └── ControleCurso.java             ← Controller — lógica + menu (ANDRÉ + JEAN no TP2)
+│   │   │   ├── TermosUtil.java                ← Tokenização + normalização + stop words PT (JEAN, TP3)
+│   │   │   ├── IndiceInvertidoCurso.java      ← Wrapper TFxIDF sobre ListaInvertida (JEAN, TP3)
+│   │   │   ├── VisaoCurso.java                ← View — E/S de dados (ANDRÉ + JEAN no TP2/TP3)
+│   │   │   └── ControleCurso.java             ← Controller — lógica + menu (ANDRÉ + JEAN no TP2/TP3)
 │   │   │
 │   │   └── inscricoes/                        ← (JEAN, TP2)
 │   │       ├── CursoUsuario.java              ← Entidade de associação N:N
@@ -41,8 +45,9 @@ projeto/
 │   │
 │   ├── Principal.java                         ← Main (menu de login + menu principal)
 │   ├── TesteRelacionamento1N.java             ← Teste de regressão do TP1 (23 verificações)
-│   ├── TesteBuscaCursos.java                  ← Teste da Busca de Cursos do TP2 (20 verificações)
-│   └── TesteInscricaoNN.java                  ← Teste do Relacionamento N:N do TP2 (29 verificações)
+│   ├── TesteBuscaCursos.java                  ← Teste da Busca de Cursos do TP2 (23 verificações)
+│   ├── TesteInscricaoNN.java                  ← Teste do Relacionamento N:N do TP2 (29 verificações)
+│   └── TesteIndiceInvertido.java              ← Teste do Índice Invertido do TP3 (23 verificações)
 │
 └── dados/                                     ← Gerado automaticamente em runtime
     ├── usuarios/
@@ -58,7 +63,9 @@ projeto/
     │   ├── indiceUsuarioCurso.btree.db        ← Árvore B+ do relacionamento 1:N
     │   ├── indiceNomeCurso.btree.db           ← Árvore B+ por nome (ordem alfabética)
     │   ├── indiceCodigo.d.db                  ← Hash Extensível por NanoID (TP2)
-    │   └── indiceCodigo.c.db
+    │   ├── indiceCodigo.c.db
+    │   ├── indiceInvertido.dicionario.db      ← Dicionário de termos da Lista Invertida (TP3)
+    │   └── indiceInvertido.blocos.db          ← Blocos encadeados da Lista Invertida (TP3)
     └── inscricoes/                            ← (TP2)
         ├── dados.db
         ├── indiceDireto.d.db
@@ -601,4 +608,141 @@ verdes — o `TesteBuscaCursos` ganhou 3 verificações novas no Teste 1
 confirmando que a data informada é persistida corretamente, e o Teste 5
 (ordenação por data) foi simplificado removendo o `update` gambiarra que
 existia exatamente porque o cadastro antigo forçava `LocalDate.now()`.
+
+
+---
+
+## O que o **JEAN** entregou (TP3 — Índice invertido + busca por palavras-chave)
+
+Esta etapa implementa o terceiro trabalho prático: criar um índice
+invertido sobre os nomes dos cursos, mantê-lo sincronizado e oferecer
+busca por palavras-chave com ordenação por TFxIDF, integrada ao menu
+"Minhas Inscrições" do TP2.
+
+### 1. `aed3/ListaInvertida.java` + `aed3/ElementoLista.java`
+
+Cópias diretas do código fornecido pelo Prof. Marcos Kutova no repositório
+[`kutova/AEDsIII/ListaInvertida`](https://github.com/kutova/AEDsIII/tree/main/ListaInvertida).
+A única alteração foi adicionar um método `close()` à `ListaInvertida`
+para fechar os `RandomAccessFile` do dicionário e dos blocos, permitindo
+integração com o ciclo de vida dos demais arquivos do sistema
+(`ArquivoCurso.close()` fecha tudo em sequência).
+
+API usada do prof:
+
+| Método                                       | Uso                                              |
+|----------------------------------------------|--------------------------------------------------|
+| `new ListaInvertida(n, dicPath, blocoPath)`  | Cria com n blocos por termo                      |
+| `create(termo, ElementoLista(id, freq))`     | Insere par no termo                              |
+| `read(termo)` → `ElementoLista[]`            | Lê toda a lista do termo                         |
+| `delete(termo, id)`                          | Remove o par do termo                            |
+| `incrementaEntidades()` / `decrementaEntidades()` | Mantém o N usado no IDF                     |
+| `numeroEntidades()` → `int`                  | Lê o N atual                                     |
+
+### 2. `entidades/cursos/TermosUtil.java`
+
+Utilitário com o pipeline de processamento de termos, aplicado
+simetricamente na indexação do nome do curso e na query do usuário:
+
+1. **Tokenização** — `texto.split("[^\\p{L}\\p{Nd}]+")` quebra por
+   qualquer sequência de não-letra/não-dígito. Vírgulas, hifens,
+   parênteses, ponto-e-vírgula etc. viram separadores.
+2. **Normalização** — `Normalizer.normalize(s, NFD)` decompõe cada letra
+   acentuada em base + combining mark; um regex remove as combining marks
+   (`\p{InCombiningDiacriticalMarks}+`); `.toLowerCase()` fecha o
+   processo. Resultado: `"Introdução"` → `"introducao"`.
+3. **Filtragem de stop words** — set de palavras em português armazenadas
+   já normalizadas (lowercase, sem acentos) cobrindo artigos,
+   preposições, conjunções, pronomes, numerais por extenso e formas
+   verbais auxiliares.
+
+O exemplo da spec é exatamente reproduzido:
+
+```
+"Introdução à Inteligência Artificial" → [introducao, inteligencia, artificial]
+"INTELIGÊNCIA Artificial"                → [inteligencia, artificial]
+```
+
+### 3. `entidades/cursos/IndiceInvertidoCurso.java`
+
+Wrapper sobre `ListaInvertida` que aplica a lógica TFxIDF:
+
+| Método                                       | O que faz                                                                  |
+|----------------------------------------------|-----------------------------------------------------------------------------|
+| `inserir(idCurso, nomeCurso)`                | Extrai termos, conta ocorrências, calcula TF = ocorrências/total_válidos, insere `(idCurso, TF)` em cada termo, incrementa N |
+| `remover(idCurso, nomeCurso)`                | Remove o par `(idCurso, *)` de cada termo do nome, decrementa N             |
+| `atualizar(idCurso, nomeAntigo, nomeNovo)`   | Remove termos antigos + insere novos, **sem mexer em N** (é o mesmo curso)  |
+| `buscar(query)` → `ArrayList<ResultadoBusca>` | Aplica o pipeline na query, calcula IDF = log10(N/df)+1 on-the-fly por termo, multiplica TF × IDF, soma scores por idCurso, ordena descrescente (desempate por id ascendente) |
+
+DTO `ResultadoBusca(int idCurso, float score)` devolvido pela busca.
+A View materializa em `Curso` em um segundo passo (via `arqCurso.read`).
+
+### 4. Integração no `ArquivoCurso.java`
+
+- Quarto índice `indiceInvertido` instanciado no construtor com paths
+  `./dados/cursos/indiceInvertido.dicionario.db` e `.blocos.db`.
+- **Bootstrap automático**: se `indiceInvertido.numeroEntidades() == 0`
+  e `readAllCursos()` retorna cursos, percorre todos e indexa um a um.
+  Cobre o cenário de upgrade — banco antigo do TP2 sendo aberto pela
+  primeira vez no executável com TP3.
+- Sincronização em `create` (insere termos do novo), `delete` (remove
+  termos do excluído) e `update` (re-indexa apenas se o nome mudou,
+  sem mexer em N).
+- Método público `readByPalavras(query)` que delega para o
+  `IndiceInvertidoCurso.buscar` e materializa cada `idCurso` em `Curso`
+  via `super.read`.
+- `close()` fecha o índice invertido junto com os demais.
+
+### 5. `ControleCurso.buscarPorPalavras(query)`
+
+Chama `arqCurso.readByPalavras` e filtra para apenas cursos em estado 0.
+Justificativa: o menu de origem é "Minhas Inscrições", cuja intenção é
+descobrir cursos disponíveis para inscrição — cursos em estado 1, 2 ou 3
+não fazem sentido nesse contexto.
+
+### 6. `VisaoCurso.telaBuscaPorPalavrasInscricao(idUsuarioLogado)`
+
+Tela paginada de resultados, com a mesma UX da listagem por data:
+- 10 resultados por página, item 10 → `(0)`
+- Navegação `(A) Página anterior` / `(B) Próxima página` condicional
+- Selecionar pelo número abre `telaDetalheCursoVisitante` já existente
+  (reusa todo o fluxo de inscrição do TP2)
+- Cabeçalho informa "Página N de M — X resultado(s) ordenados por
+  relevância"
+
+E o case `(B)` do `VisaoInscricao.menuMinhasInscricoes` agora chama
+essa tela em vez do antigo placeholder TP3.
+
+### 7. `TesteIndiceInvertido.java`
+
+23 verificações organizadas em 6 blocos:
+
+1. **TermosUtil** — tokenização, ordem preservada, acentos removidos,
+   uppercase normalizado, stop words filtradas, edge cases null/vazio
+2. **Cenário completo da spec** — 4 cursos (Introdução IA, Inteligência
+   Emocional, Inteligência+IA, Introdução Gestão), busca
+   "Inteligencia Artificial" → ordem 1, 3, 2 com curso 4 ausente
+3. **Sincronização** — delete remove do índice, update re-indexa termos
+4. **Robustez** — query só com stop words, termos inexistentes,
+   case-insensitive, null/vazio sem NPE
+5. **Filtragem por estado** — curso cancelado não aparece na busca
+6. **Bootstrap** — apaga os arquivos do índice e reabre; o construtor
+   reindexa automaticamente todos os cursos existentes em disco
+
+---
+
+## Validação contra os valores numéricos da spec
+
+A especificação dá os scores esperados como `(1; 0.808), (3; 0.656), (2; 0.375)`.
+A implementação calcula `(1; 0.809), (3; 0.710), (2; 0.375)`.
+
+| Curso | Score calculado | Score na spec | Verificação manual da fórmula da spec |
+|-------|-----------------|---------------|---------------------------------------|
+| 1     | 0.809           | 0.808         | TF(int)·IDF(int) + TF(art)·IDF(art) = 0.333·1.125 + 0.333·1.301 = 0.375 + 0.433 = **0.808**. Diferença de 0.001 é arredondamento float — ok. |
+| 2     | 0.375           | 0.375         | TF(int)·IDF(int) = 0.333·1.125 = **0.375**. Exato. |
+| 3     | 0.710           | 0.656         | TF(int)·IDF(int) + TF(art)·IDF(art) = 0.4·1.125 + 0.2·1.301 = 0.45 + **0.260** = **0.710**. A spec escreve no texto que o segundo produto é 0.206 e soma 0.45 + 0.206 = 0.656, mas matematicamente 0.2·1.301 = 0.260. É um typo da spec; o cálculo correto pela fórmula que ela mesma define é 0.710. |
+
+**A ordem final dos cursos é a mesma (1, 3, 2)** em ambos os cálculos,
+e o curso 4 (Introdução à Gestão de Equipes) fica de fora porque não
+contém nenhum dos termos da query — exatamente como a spec descreve.
 

@@ -133,4 +133,25 @@ public class ControleCurso {
     public Usuario buscarAutor(int idUsuario) throws Exception {
         return arqUsuario.read(idUsuario);
     }
+
+    /**
+     * Busca cursos por palavras-chave do nome (TP3).
+     * Retorna cursos ordenados pelo score TFxIDF descendente.
+     *
+     * Sera filtrado para mostrar somente cursos disponiveis (estado 0):
+     * cursos em outros estados nao fazem sentido em um menu cuja
+     * intencao eh descobrir cursos para se inscrever.
+     *
+     * @param query texto informado pelo usuario
+     * @return lista ordenada por relevancia, filtrada por estado 0
+     */
+    public ArrayList<Curso> buscarPorPalavras(String query) throws Exception {
+        if (query == null) return new ArrayList<>();
+        ArrayList<Curso> brutos = arqCurso.readByPalavras(query);
+        ArrayList<Curso> filtrados = new ArrayList<>();
+        for (Curso c : brutos) {
+            if (c.getEstado() == 0) filtrados.add(c);
+        }
+        return filtrados;
+    }
 }

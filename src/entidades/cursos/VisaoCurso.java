@@ -472,6 +472,103 @@ public class VisaoCurso {
      * @param idUsuarioLogado - id do usuario que esta visualizando
      * @param breadcrumbContexto - "Lista de cursos" ou "Buscar por codigo"
      */
+    /**
+     * Busca cursos por palavras-chave do nome (TP3).
+     * Aplica o modelo TFxIDF via IndiceInvertidoCurso e mostra os
+     * resultados ordenados por relevancia descendente, com paginacao
+     * de 10 em 10 (mesmo padrao da listagem por data).
+     */
+    public void telaBuscaPorPalavrasInscricao(int idUsuarioLogado) {
+        System.out.println("\nG12 TP1 1.2");
+        System.out.println("--------------");
+        System.out.println("> Inicio > Minhas Inscricoes > Buscar por palavras-chave\n");
+
+        System.out.print("Digite as palavras-chave: ");
+        String query = console.nextLine().trim();
+        if (query.isEmpty()) {
+            System.out.println("Nenhuma palavra-chave informada.");
+            return;
+        }
+
+        ArrayList<Curso> resultados;
+        try {
+            resultados = controle.buscarPorPalavras(query);
+        } catch (Exception e) {
+            System.out.println("Erro na busca: " + e.getMessage());
+            return;
+        }
+
+        if (resultados.isEmpty()) {
+            System.out.println("\nNenhum curso encontrado para '" + query + "'.");
+            return;
+        }
+
+        final int PAGE_SIZE = 10;
+        int totalPaginas = (int) Math.ceil(resultados.size() / (double) PAGE_SIZE);
+        int paginaAtual = 1;
+
+        while (true) {
+            System.out.println("\nG12 TP1 1.2");
+            System.out.println("--------------");
+            System.out.println("> Inicio > Minhas Inscricoes > Busca: '" + query + "'\n");
+            System.out.println("Pagina " + paginaAtual + " de " + totalPaginas
+                + "  -  " + resultados.size() + " resultado(s) ordenados por relevancia\n");
+
+            int inicio = (paginaAtual - 1) * PAGE_SIZE;
+            int fim = Math.min(inicio + PAGE_SIZE, resultados.size());
+
+            for (int i = inicio; i < fim; i++) {
+                Curso c = resultados.get(i);
+                int pos = i - inicio + 1;
+                String rotulo = (pos == 10) ? "0" : String.valueOf(pos);
+                System.out.println("(" + rotulo + ") " + c.getNome()
+                    + " - " + c.getDataInicio().format(FMT_DATA));
+            }
+
+            System.out.println();
+            if (paginaAtual > 1)            System.out.println("(A) Pagina anterior");
+            if (paginaAtual < totalPaginas) System.out.println("(B) Proxima pagina");
+            System.out.println();
+            System.out.println("(R) Retornar ao menu anterior");
+            System.out.print("\nOpcao: ");
+
+            String opcao = console.nextLine().trim();
+            if (opcao.isEmpty()) continue;
+
+            if (opcao.equalsIgnoreCase("A")) {
+                if (paginaAtual > 1) paginaAtual--;
+                else System.out.println("Ja esta na primeira pagina.");
+            } else if (opcao.equalsIgnoreCase("B")) {
+                if (paginaAtual < totalPaginas) paginaAtual++;
+                else System.out.println("Ja esta na ultima pagina.");
+            } else if (opcao.equalsIgnoreCase("R")) {
+                return;
+            } else {
+                int num;
+                try { num = Integer.parseInt(opcao); }
+                catch (NumberFormatException e) {
+                    System.out.println("Opcao invalida.");
+                    continue;
+                }
+                int indiceLocal;
+                if (num == 0) indiceLocal = 9;
+                else if (num >= 1 && num <= 9) indiceLocal = num - 1;
+                else {
+                    System.out.println("Numero fora do intervalo.");
+                    continue;
+                }
+                int indiceGlobal = inicio + indiceLocal;
+                if (indiceGlobal < fim) {
+                    telaDetalheCursoVisitante(resultados.get(indiceGlobal).getID(),
+                                              idUsuarioLogado,
+                                              "Busca: '" + query + "'");
+                } else {
+                    System.out.println("Esta posicao nao tem curso nesta pagina.");
+                }
+            }
+        }
+    }
+
     private void telaDetalheCursoVisitante(int idCurso, int idUsuarioLogado,
                                            String breadcrumbContexto) {
         while (true) {

@@ -26,6 +26,7 @@ public class ArquivoCurso extends Arquivo<Curso> {
     ArvoreBMais<ParIdId> indiceUsuarioCurso;
     ArvoreBMais<ParNomeId> indiceNomeCurso;
     HashExtensivel<ParCodigoId> indiceCodigoCurso;
+    IndiceInvertidoCurso indiceInvertido;
 
     public ArquivoCurso() throws Exception {
         super("cursos", Curso.class.getConstructor());
@@ -48,10 +49,32 @@ public class ArquivoCurso extends Arquivo<Curso> {
             "./dados/cursos/indiceCodigo.d.db",
             "./dados/cursos/indiceCodigo.c.db"
         );
+
+        // TP3: indice invertido sobre os nomes dos cursos.
+        // Usa a ListaInvertida do prof (pacote aed3) com dois arquivos:
+        // o dicionario de termos e os blocos com (idCurso, TF).
+        indiceInvertido = new IndiceInvertidoCurso(
+            "./dados/cursos/indiceInvertido.dicionario.db",
+            "./dados/cursos/indiceInvertido.blocos.db"
+        );
+
+        // Bootstrap: cursos cadastrados em versoes anteriores (pre-TP3)
+        // nao tem entrada no indice invertido. Se o indice estiver vazio
+        // mas o arquivo de dados ja tiver cursos, reindexa todos.
+        // Caso tipico: primeiro `java Principal` apos a entrega do TP3
+        // em um repositorio com cursos do TP2 ja gravados em disco.
+        if (indiceInvertido.numeroEntidades() == 0) {
+            ArrayList<Curso> existentes = readAllCursos();
+            if (!existentes.isEmpty()) {
+                for (Curso c : existentes) {
+                    indiceInvertido.inserir(c.getID(), c.getNome());
+                }
+            }
+        }
     }
 
     /**
-     * Insere curso e atualiza os tres indices.
+     * Insere curso e atualiza os quatro indices (3 do TP1/TP2 + 1 invertido do TP3).
      */
     @Override
     public int create(Curso curso) throws Exception {
@@ -64,11 +87,14 @@ public class ArquivoCurso extends Arquivo<Curso> {
 
         indiceCodigoCurso.create(new ParCodigoId(curso.getCodigo(), id));
 
+        // TP3: indexa os termos do nome do curso na lista invertida.
+        indiceInvertido.inserir(id, curso.getNome());
+
         return id;
     }
 
     /**
-     * Remove curso e limpa os tres indices.
+     * Remove curso e limpa os quatro indices (3 do TP1/TP2 + 1 invertido do TP3).
      */
     @Override
     public boolean delete(int id) throws Exception {
@@ -84,6 +110,10 @@ public class ArquivoCurso extends Arquivo<Curso> {
             indiceNomeCurso.delete(new ParNomeId(nomeTruncado, id));
 
             indiceCodigoCurso.delete(Math.abs(curso.getCodigo().hashCode()));
+
+            // TP3: remove os termos do nome do indice invertido e
+            // decrementa o contador de entidades (N) usado no IDF.
+            indiceInvertido.remover(id, curso.getNome());
         }
         return removido;
     }
@@ -108,6 +138,12 @@ public class ArquivoCurso extends Arquivo<Curso> {
                     new ParNomeId(truncaNome(cursoAntigo.getNome()), novoCurso.getID()));
                 indiceNomeCurso.create(
                     new ParNomeId(truncaNome(novoCurso.getNome()), novoCurso.getID()));
+
+                // TP3: nome mudou -> re-indexar termos no invertido
+                // (delete dos termos antigos + insert dos novos, sem mexer
+                // no contador N porque eh o mesmo curso).
+                indiceInvertido.atualizar(novoCurso.getID(),
+                    cursoAntigo.getNome(), novoCurso.getNome());
             }
 
             if (cursoAntigo.getIdUsuario() != novoCurso.getIdUsuario()) {
@@ -250,12 +286,33 @@ public class ArquivoCurso extends Arquivo<Curso> {
         return cursos;
     }
 
+    /**
+     * Busca cursos por palavras-chave do nome usando o indice invertido
+     * (TFxIDF). Retorna os Curso ja materializados, na ordem decrescente
+     * de score; o calculo do score eh feito pelo IndiceInvertidoCurso.
+     *
+     * @param query texto livre informado pelo usuario
+     * @return cursos ordenados por relevancia. Lista vazia se nenhuma
+     *         palavra valida foi reconhecida na query ou se nenhum curso
+     *         contem qualquer dos termos.
+     */
+    public ArrayList<Curso> readByPalavras(String query) throws Exception {
+        ArrayList<IndiceInvertidoCurso.ResultadoBusca> ranking = indiceInvertido.buscar(query);
+        ArrayList<Curso> cursos = new ArrayList<>(ranking.size());
+        for (IndiceInvertidoCurso.ResultadoBusca r : ranking) {
+            Curso c = read(r.idCurso);
+            if (c != null) cursos.add(c);
+        }
+        return cursos;
+    }
+
     @Override
     public void close() throws Exception {
         super.close();
         indiceUsuarioCurso.close();
         indiceNomeCurso.close();
         indiceCodigoCurso.close();
+        indiceInvertido.close();
     }
 
     private String truncaNome(String nome) {

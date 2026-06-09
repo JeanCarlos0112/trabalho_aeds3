@@ -108,7 +108,8 @@ public class VisaoInscricao {
                         visaoCurso.telaBuscaPorCodigoInscricao(idUsuarioLogado);
                     break;
                 case "B":
-                    System.out.println("\n(Busca por palavras-chave sera implementada no TP3.)");
+                    if (visaoCurso != null)
+                        visaoCurso.telaBuscaPorPalavrasInscricao(idUsuarioLogado);
                     break;
                 case "C":
                     if (visaoCurso != null)
